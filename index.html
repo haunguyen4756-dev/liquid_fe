@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Liquidity Efficiency Map · Metric</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070914;--card:rgba(255,255,255,.045);--bd:rgba(255,255,255,.09);--tx:#e8ecff;--mu:#8c93b8;--g:#2dffb0;--c:#38d6ff;--p:#9b6bff;--r:#ff5d7a;--y:#ffc857;font-family:'Space Grotesk',system-ui,sans-serif}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden}
+.orb{position:fixed;border-radius:50%;filter:blur(110px);opacity:.35;z-index:0;animation:fl 18s ease-in-out infinite alternate}
+.o1{width:480px;height:480px;background:var(--p);top:-120px;left:-100px}
+.o2{width:420px;height:420px;background:var(--c);bottom:-140px;right:-80px;animation-delay:-6s}
+.o3{width:300px;height:300px;background:var(--g);top:40%;left:55%;opacity:.15;animation-delay:-11s}
+@keyframes fl{to{transform:translate(70px,50px) scale(1.2)}}
+body:before{content:"";position:fixed;inset:0;z-index:0;background-image:linear-gradient(var(--bd) 1px,transparent 1px),linear-gradient(90deg,var(--bd) 1px,transparent 1px);background-size:56px 56px;opacity:.25;mask-image:radial-gradient(circle at 50% 30%,#000,transparent 75%)}
+.wrap{position:relative;z-index:1;max-width:1320px;margin:auto;padding:22px 20px 60px}
+header{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin-bottom:22px}
+.logo{display:flex;gap:12px;align-items:center}
+.lg{width:42px;height:42px;border-radius:12px;background:conic-gradient(from 180deg,var(--g),var(--c),var(--p),var(--g));display:grid;place-items:center;animation:spin 8s linear infinite;box-shadow:0 0 30px #2dffb055}
+.lg i{width:34px;height:34px;border-radius:9px;background:var(--bg);display:block;animation:spin 8s linear infinite reverse;position:relative}
+.lg i:after{content:"";position:absolute;inset:9px;border-radius:3px;background:linear-gradient(135deg,var(--g),var(--c))}
+@keyframes spin{to{transform:rotate(360deg)}}
+h1{font-size:22px;letter-spacing:-.3px}
+h1 span{background:linear-gradient(90deg,var(--g),var(--c));-webkit-background-clip:text;color:transparent}
+.sub{font-size:12px;color:var(--mu)}
+.ctl{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+select,input,button{font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:9px 12px;outline:0;backdrop-filter:blur(10px)}
+select option{background:#12152b}
+button{cursor:pointer;transition:.2s}button:hover{border-color:var(--c);box-shadow:0 0 18px #38d6ff33}
+.seg{display:flex;border:1px solid var(--bd);border-radius:10px;overflow:hidden;background:var(--card)}
+.seg button{border:0;border-radius:0;background:none}
+.seg button.on{background:linear-gradient(135deg,#2dffb033,#38d6ff33);color:var(--g)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:18px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:18px;backdrop-filter:blur(16px);animation:up .6s both}
+@keyframes up{from{opacity:0;transform:translateY(16px)}}
+.stat b{display:block;font-size:28px;margin-top:6px;font-family:'JetBrains Mono',monospace}
+.stat small,.lbl{color:var(--mu);font-size:12px;text-transform:uppercase;letter-spacing:1px}
+.grid{display:grid;grid-template-columns:380px 1fr;gap:16px}
+@media(max-width:980px){.grid{grid-template-columns:1fr}}
+.list{max-height:760px;overflow:auto;padding:12px}
+.list::-webkit-scrollbar,.tw::-webkit-scrollbar{width:6px;height:6px}.list::-webkit-scrollbar-thumb,.tw::-webkit-scrollbar-thumb{background:#ffffff22;border-radius:9px}
+.tools{display:grid;gap:8px;margin-bottom:10px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-size:12px;padding:5px 10px;border-radius:20px;cursor:pointer;user-select:none}
+.chip.on{background:#2dffb022;border-color:var(--g);color:var(--g)}
+.pool{display:flex;gap:10px;align-items:center;padding:11px;border-radius:14px;cursor:pointer;border:1px solid transparent;transition:.2s}
+.pool:hover{background:#ffffff0a;transform:translateX(3px)}
+.pool.sel{background:linear-gradient(90deg,#2dffb014,#38d6ff10);border-color:#2dffb055}
+.pool .nm{font-weight:700}.pool .mt{font-size:11px;color:var(--mu);font-family:'JetBrains Mono',monospace}
+.pool .sc{margin-left:auto;text-align:right;font-family:'JetBrains Mono',monospace;font-weight:600}
+.bar{height:3px;background:#ffffff14;border-radius:3px;margin-top:5px;overflow:hidden;width:70px;margin-left:auto}
+.bar i{display:block;height:100%;transition:width 1s}
+.star{color:var(--mu);cursor:pointer;font-size:16px}.star.on{color:var(--y)}
+.top{display:flex;gap:26px;flex-wrap:wrap;align-items:center}
+.ring{position:relative;width:170px;height:170px;flex:none}
+.ring svg{transform:rotate(-90deg)}
+.ring .v{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.ring .v b{font-size:44px;font-family:'JetBrains Mono',monospace}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;flex:1;min-width:280px}
+.kv div{background:#ffffff08;border-radius:12px;padding:12px}
+.kv b{display:block;font-size:18px;margin-top:4px;font-family:'JetBrains Mono',monospace}
+.idle{margin:16px 0;padding:14px 16px;border-radius:14px;background:linear-gradient(90deg,#ff5d7a1c,transparent);border-left:3px solid var(--r);font-size:15px;line-height:1.5}
+.idle strong{color:var(--r);font-family:'JetBrains Mono',monospace}
+h3{font-size:15px;margin:18px 0 10px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.hm{display:flex;align-items:flex-end;gap:3px;height:170px;padding:8px 0;overflow-x:auto}
+.cell{flex:1;min-width:9px;border-radius:4px 4px 2px 2px;transform-origin:bottom;animation:grow .7s both;position:relative;cursor:crosshair;transition:filter .2s}
+.cell:hover{filter:brightness(1.5)}
+.cell.on{background:linear-gradient(180deg,var(--g),#0a8f6a);box-shadow:0 0 12px #2dffb044}
+.cell.off{background:#5a6080aa}
+.cell.mid{outline:2px solid var(--c);outline-offset:1px}
+@keyframes grow{from{transform:scaleY(0);opacity:0}}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--mu);align-items:center;flex-wrap:wrap}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px}
+.tip{position:fixed;pointer-events:none;background:#0d1024f2;border:1px solid var(--bd);padding:8px 11px;border-radius:10px;font-size:12px;z-index:9;display:none;font-family:'JetBrains Mono',monospace;line-height:1.5}
+.rec{display:grid;gap:8px}
+.rec div{padding:10px 14px;border-radius:12px;background:#ffffff08;font-size:14px;line-height:1.45;animation:up .5s both}
+.rec .good{border-left:3px solid var(--g)}.rec .bad{border-left:3px solid var(--r)}.rec .warn{border-left:3px solid var(--y)}
+.tw{overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{color:var(--mu);font-weight:500;text-align:left;padding:8px;font-size:11px;text-transform:uppercase;letter-spacing:1px}
+td{padding:9px 8px;border-top:1px solid var(--bd);font-family:'JetBrains Mono',monospace}
+tr.cl{cursor:pointer}tr.cl:hover td{background:#ffffff08}
+.pos{color:var(--g)}.neg{color:var(--r)}
+.alert{margin-bottom:14px;padding:12px 16px;border-radius:14px;background:#ffc85720;border:1px solid #ffc85755;color:var(--y);font-size:14px;animation:up .5s both}
+.load{display:grid;place-items:center;padding:60px;color:var(--mu);gap:14px}
+.sp{width:34px;height:34px;border-radius:50%;border:3px solid #ffffff22;border-top-color:var(--g);animation:spin 1s linear infinite}
+.note{font-size:11px;color:var(--mu);margin-top:10px;line-height:1.5}
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:16px}.dot{cursor:pointer;transition:.2s}.dot:hover{opacity:1!important;stroke:#fff}.tmap{position:relative;width:100%;border-radius:14px;overflow:hidden;margin-top:10px}
+.tile{position:absolute;border-radius:6px;padding:6px 8px;color:#fff;font-size:12px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;overflow:hidden;animation:pop .5s both;transition:filter .2s;box-shadow:inset 0 0 0 1px #ffffff1f}
+.tile:hover{filter:brightness(1.35);z-index:2}.tile.sel{box-shadow:inset 0 0 0 2px #fff}.tile b{font-size:13px}.tile span{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700}
+@keyframes pop{from{opacity:0;transform:scale(.85)}}
+.bar{transform-box:fill-box;transform-origin:50% 100%;animation:grow .7s both}
+#bg{position:fixed;inset:0;z-index:0;pointer-events:none}
+.stat,.g2>.card{transition:transform .2s,box-shadow .2s;transform-style:preserve-3d}.tilting{box-shadow:0 18px 40px #0008,0 0 28px #38d6ff22}
+@property --a{syntax:'<angle>';inherits:false;initial-value:0deg}
+.glow{position:relative}.glow:before{content:"";position:absolute;inset:-1px;border-radius:19px;padding:1px;background:conic-gradient(from var(--a),transparent 65%,var(--g),var(--c),var(--p),transparent);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:rot 6s linear infinite;pointer-events:none}
+@keyframes rot{to{--a:360deg}}
+#t3d{width:100%;border-radius:14px;background:radial-gradient(circle at 50% 30%,#141a3a,#070914);cursor:grab;border:1px solid var(--bd)}
+.tabs{display:flex;gap:6px;margin:0 0 16px;padding:5px;border:1px solid var(--bd);border-radius:14px;background:var(--card);backdrop-filter:blur(12px);width:max-content;max-width:100%;overflow-x:auto}
+.tabs button{border:0;background:none;padding:9px 16px;border-radius:10px;color:var(--mu);white-space:nowrap}
+.tabs button.on{background:linear-gradient(135deg,#2dffb02e,#38d6ff2e);color:var(--g);box-shadow:inset 0 0 0 1px #2dffb044}
+#stabs{margin:14px 0 4px}.pane{animation:up .4s both}[hidden]{display:none!important}
+.tl{border-radius:50%;object-fit:cover;background:#1a1f3a;border:1px solid #0009;display:inline-block;vertical-align:middle}
+.tl.fb{display:inline-grid;place-items:center;font-size:10px;font-weight:700;color:#fff}
+.pp{display:inline-flex;vertical-align:middle;margin-right:7px}.pp .tl+.tl{margin-left:-7px}
+button{display:inline-flex;align-items:center;gap:7px}.ic{vertical-align:-3px;flex:none}h3 .ic{color:var(--g);margin-right:6px}.ok{color:var(--c)}
+header{position:sticky;top:0;z-index:30;margin:-22px -20px 20px;padding:14px 20px;background:rgba(7,9,20,.72);backdrop-filter:blur(16px);border-bottom:1px solid var(--bd)}.tip{z-index:60}
+.btn-ghost{background:linear-gradient(135deg,#2dffb022,#38d6ff22);border-color:#2dffb055;color:var(--g)}
+.sw{display:flex;align-items:center;gap:8px;color:var(--mu);font-size:13px;cursor:pointer}.sw input{display:none}.sw i{width:34px;height:20px;border-radius:20px;background:#ffffff1f;position:relative;transition:.2s}.sw i:after{content:"";position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:.2s}.sw input:checked+i{background:linear-gradient(90deg,var(--g),var(--c))}.sw input:checked+i:after{left:17px}
+.stat{position:relative}.si{display:grid;place-items:center;width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,#2dffb01f,#38d6ff1f);color:var(--g);border:1px solid #2dffb033}.stat .si{position:absolute;top:16px;right:16px}
+.hint{color:var(--mu);cursor:help;margin-left:5px;display:inline-block}.hint:hover{color:var(--c)}
+.star{display:inline-flex}.star.on svg{fill:currentColor}
+.hero{margin-bottom:18px;display:grid;grid-template-columns:1.1fr 2fr auto;gap:22px;align-items:center}
+.hero h2{font-size:21px;letter-spacing:-.3px;margin-bottom:6px}.hero p{color:var(--mu);font-size:13px;line-height:1.5}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.steps div{display:grid;gap:5px;align-content:start}.steps small{color:var(--mu);font-size:12px;line-height:1.4}
+@media(max-width:1000px){.hero{grid-template-columns:1fr}.steps{grid-template-columns:1fr}}
+.toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,20px);background:#0d1024f2;border:1px solid var(--g);color:var(--g);padding:10px 18px;border-radius:12px;opacity:0;transition:.3s;z-index:80;pointer-events:none}.toast.on{opacity:1;transform:translate(-50%,0)}
+details.meth{margin-top:18px}details.meth summary{cursor:pointer;color:var(--mu);font-weight:500}details.meth[open] summary{color:var(--tx)}
+.load .ic{color:var(--y)}
+.live{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--g);margin-right:8px;box-shadow:0 0 0 0 #2dffb088;animation:pulse 2s infinite}@keyframes pulse{70%{box-shadow:0 0 0 8px #2dffb000}100%{box-shadow:0 0 0 0 #2dffb000}}
+.tile{padding:10px;gap:6px;justify-content:flex-start}.tile .row{display:flex;align-items:center;gap:6px;min-width:0}.tile .row b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile .sc{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;line-height:1;margin-top:auto}.tile .sc small{font-size:12px;opacity:.7;margin-left:2px}.tile .s2{font-size:18px}.tile .s3{font-size:13px}.tile .meta{font-size:11px;opacity:.85}
+.bar2{height:4px;border-radius:3px;background:#0006;overflow:hidden}.bar2 i{display:block;height:100%;background:#ffffffcc}
+.tdot{position:absolute;top:9px;right:9px;width:8px;height:8px;border-radius:50%;background:#ffffff44}.tdot.green{background:#2dffb0;box-shadow:0 0 8px #2dffb0}.tdot.yellow{background:#ffc857}.tdot.red{background:#ff5d7a}
+.tmap.quiet .tile{animation:none}
+.swst{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;background:#ffffff08;font-size:13px;margin:6px 0 10px;flex-wrap:wrap}.swst.ok{border-left:3px solid var(--g)}.swst.err{border-left:3px solid var(--r)}.swst.ld{border-left:3px solid var(--c)}
+dialog{background:#0d1024;color:var(--tx);border:1px solid var(--bd);border-radius:18px;padding:22px;max-width:560px;width:92%}dialog::backdrop{background:#000a;backdrop-filter:blur(4px)}
+dialog input{width:100%;margin:4px 0 12px}
+.mring{width:84px;height:84px;border-radius:50%;background:conic-gradient(var(--g) calc(var(--v)*1%),#ffffff14 0);display:grid;place-items:center;position:relative;flex:none}.mring:before{content:"";position:absolute;inset:8px;border-radius:50%;background:#0c0f24}.mring b{position:relative;font-family:'JetBrains Mono',monospace;font-size:20px}
+.cc{display:flex;gap:16px;align-items:center}.dist{display:flex;height:10px;border-radius:6px;overflow:hidden;margin:12px 0 6px;background:#ffffff10}.dist i{display:block;height:100%}
+.strip{display:flex;gap:3px;flex-wrap:wrap}.strip i{width:12px;height:18px;border-radius:3px;background:#5a6080;display:block}.strip i.t{background:var(--g)}.strip i.p{background:#3a4066}.strip i.c{outline:2px solid var(--c)}
+.alert.err{background:#ff5d7a1a;border-color:#ff5d7a66;color:var(--r)}.alert.err button{margin-left:8px;padding:4px 10px;font-size:12px}
+.tabs{position:relative;gap:4px;padding:5px;background:linear-gradient(180deg,#ffffff0d,#ffffff05);box-shadow:0 8px 24px #0005,inset 0 1px 0 #ffffff14}
+.tabs:before{content:"";position:absolute;left:var(--x,5px);top:5px;bottom:5px;width:var(--w,0px);border-radius:11px;background:linear-gradient(135deg,#2dffb02e,#38d6ff2e);box-shadow:inset 0 0 0 1px #2dffb055,0 0 22px #2dffb02e;transition:left .35s cubic-bezier(.2,.8,.2,1),width .35s cubic-bezier(.2,.8,.2,1);pointer-events:none}
+.tabs button{position:relative;z-index:1;transition:color .2s}.tabs button:hover{color:var(--tx);box-shadow:none;border-color:transparent}.tabs button.on{background:none!important;box-shadow:none!important;color:var(--g)}
+.seg{border-radius:12px;padding:3px;gap:2px}.seg button{border-radius:9px;padding:7px 13px}.seg button.on{box-shadow:inset 0 0 0 1px #2dffb044}
+header:after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,var(--g),var(--c),var(--p),transparent);opacity:.55}
+.bar{height:6px;border-radius:6px;background:#ffffff14;width:84px}.bar i{position:relative;overflow:hidden;border-radius:6px;box-shadow:0 0 10px -2px currentColor}
+.bar i:after,.bar2 i:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,#ffffff66,transparent);transform:translateX(-100%);animation:shine 2.8s infinite}
+@keyframes shine{to{transform:translateX(100%)}}
+.bar2{height:5px;border-radius:5px}.bar2 i{position:relative;overflow:hidden;border-radius:5px}
+.dist{height:12px;border-radius:8px;gap:2px;background:none}.dist i{border-radius:4px;transition:width 1s}
+.chip{border-radius:999px;padding:6px 12px;transition:.2s}.chip:hover{border-color:#38d6ff66}
+.pager{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--bd);flex-wrap:wrap}
+.pgb{display:flex;gap:4px;align-items:center}.pgb button{min-width:32px;height:32px;padding:0 8px;justify-content:center;border-radius:9px;font-size:13px}
+.pgb button.on{background:linear-gradient(135deg,#2dffb033,#38d6ff33);border-color:#2dffb066;color:var(--g)}.pgb button:disabled{opacity:.35;cursor:default;box-shadow:none;border-color:var(--bd)}.pgd{color:var(--mu);padding:0 2px}
+header.hdr{position:sticky;top:0;z-index:40;margin:0;padding:0;display:block;background:linear-gradient(180deg,rgba(10,12,30,.94),rgba(8,10,24,.84));backdrop-filter:blur(18px) saturate(140%);border-bottom:1px solid var(--bd);box-shadow:0 12px 32px -20px #000}
+header.hdr:after{display:none}
+.hin{max-width:1320px;margin:auto;padding:12px 20px;display:flex;flex-wrap:wrap;gap:14px 28px;align-items:flex-end;justify-content:space-between}
+.hin .logo{align-self:center;gap:12px}.hin h1{font-size:19px}.hin .sub{font-size:11px;margin-top:2px}
+.lg{width:38px;height:38px;animation:none;box-shadow:0 0 24px #2dffb044}.lg i{width:30px;height:30px;animation:none}
+.hctl{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap}
+.cg{display:grid;gap:5px}.cg>small{font-size:10px;letter-spacing:1.1px;text-transform:uppercase;color:var(--mu);padding-left:3px;font-weight:500}
+.dd{position:relative}.ddb{height:38px;min-width:158px;justify-content:space-between;padding:0 12px;border-radius:11px;background:#ffffff0a;border:1px solid var(--bd);font-weight:500}.ddb .ddv{display:inline-flex;align-items:center;gap:9px}.ddb .ic{color:var(--mu);transition:transform .2s}.dd.open .ddb .ic{transform:rotate(180deg)}
+.dd.open .ddb,.ddb:hover{border-color:#38d6ff66;background:#ffffff12;box-shadow:0 0 0 3px #38d6ff14}
+.ddm{position:absolute;top:calc(100% + 8px);left:0;min-width:100%;width:max-content;background:rgba(13,16,36,.97);border:1px solid var(--bd);border-radius:14px;padding:6px;box-shadow:0 24px 60px #000c;z-index:70;animation:up .18s both}
+.ddm button{width:100%;justify-content:flex-start;border:0;background:none;padding:10px 12px;border-radius:9px;backdrop-filter:none}.ddm button span{flex:1;text-align:left}.ddm button:hover{background:#ffffff0f;box-shadow:none}.ddm button.on{color:var(--g);background:#2dffb012}
+.cico{flex:none;border-radius:50%;vertical-align:middle}.cico.fb{display:inline-grid;place-items:center;background:linear-gradient(135deg,var(--p),var(--c));color:#fff;font-weight:700}
+.hin .seg{height:38px;padding:3px;border-radius:11px;background:#ffffff0a}.hin .seg button{height:30px;padding:0 12px;border-radius:8px;font-size:13px}.hin .seg button.on{background:linear-gradient(135deg,#2dffb02e,#38d6ff2e);color:var(--g);box-shadow:inset 0 0 0 1px #2dffb044}
+.ibtn{height:38px;border-radius:11px;padding:0 14px;background:#ffffff0a}
+@media(max-width:760px){.hin{padding:10px 14px}.hctl{width:100%}.cg{flex:1 1 140px}.ddb{width:100%}}
+.pg{padding:2px 7px;border-radius:6px;font-size:10px;font-weight:700}
+
+/* ===== v2: smoother, friendlier layout ===== */
+html{scroll-behavior:smooth}
+body{font-size:14.5px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{padding:26px 24px 72px}
+.card{backdrop-filter:none;background:rgba(255,255,255,.04);border-radius:20px;padding:20px}
+.noa{animation:none!important}
+.orb{will-change:transform}
+.glow:before{animation:none}#hero.glow:before{animation:rot 8s linear infinite}
+:focus-visible{outline:2px solid var(--c);outline-offset:2px;border-radius:8px}
+button,select,input{min-height:38px}
+.chip{min-height:0}.pgb button{min-height:32px}.ddm button{min-height:40px}.tabs button{min-height:40px}.seg button{min-height:0}
+input:focus,select:focus{border-color:#38d6ff88;box-shadow:0 0 0 3px #38d6ff1f}
+/* stats: always one row on desktop */
+#stats{grid-template-columns:repeat(7,minmax(0,1fr));gap:12px;margin-bottom:20px}
+#stats .stat{padding:16px 14px;min-width:0;display:flex;flex-direction:column;gap:2px}
+#stats .stat .si{position:static;width:32px;height:32px;border-radius:10px;margin-bottom:10px}
+#stats .stat small{font-size:10.5px;letter-spacing:.8px;line-height:1.3;min-height:2.6em}
+#stats .stat b{font-size:clamp(17px,1.75vw,24px);margin-top:0;white-space:nowrap;letter-spacing:-.4px}
+.stat{transition:transform .2s,border-color .2s}.stat:hover,.g2>.card:hover{transform:translateY(-2px);border-color:#38d6ff44}
+@media(max-width:1180px){#stats{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}}
+@media(max-width:560px){#stats{grid-template-columns:repeat(2,minmax(0,1fr))}.wrap{padding:18px 14px 60px}.hero{gap:14px}}
+/* friendlier lists, tabs and tables */
+.tabs{margin-bottom:18px}.tabs button{padding:10px 18px;font-weight:500}
+.pool{padding:12px}.pool .nm{font-size:14.5px}
+.list{padding:14px}
+td{padding:11px 8px}tr.cl:hover td{background:#ffffff0d}
+h3{margin:22px 0 12px;font-size:15.5px}
+.hero{padding:22px}.hero h2{font-size:22px}
+.tile{border-radius:10px}
+.alert{border-radius:14px}
+.idle{border-radius:14px}
+.list::-webkit-scrollbar-thumb,.tw::-webkit-scrollbar-thumb{background:#ffffff2e}
+/* chain logos */
+.ddm button .cico,.ddb .cico,.ddm button .cico.lg2{flex:none!important;flex-grow:0!important;width:20px;height:20px;min-width:20px;max-width:20px;overflow:hidden}
+.ddm button .cico.lg2 img,.ddb .cico.lg2 img{width:100%;height:100%;max-width:100%}
+.ddm button .cico.lg2.rh img,.ddb .cico.lg2.rh img{width:64%;height:64%}
+.cg .dd .cico{width:20px;height:20px}
+
+.cico{display:inline-block;flex:none;border-radius:50%;vertical-align:middle}
+.cico.lg2{display:inline-grid;place-items:center;overflow:hidden;background:#ffffff14;box-shadow:0 0 0 1px #ffffff1f}
+.cico.lg2 img{width:100%;height:100%;object-fit:cover;display:block}
+.cico.lg2.rh{background:#ccff00;box-shadow:none}.cico.lg2.rh img{width:64%;height:64%;object-fit:contain;filter:brightness(0)}
+@media (prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
+<div class="tip" id="tip"></div>
+<header class="hdr"><div class="hin">
+  <div class="logo"><div class="lg"><i></i></div><div><h1>Liquidity Efficiency <span>Map</span></h1><div class="sub">Community tool for Metric LPs · live data from api.metric.xyz</div></div></div>
+  <div class="hctl">
+    <div class="cg"><small>Network</small><div class="dd" id="chaindd"></div></div>
+    <div class="cg"><small>Window</small><div class="seg" id="win"><button data-w="24h">24h</button><button data-w="7d" class="on">7d</button><button data-w="30d">30d</button><button data-w="all">All</button></div></div>
+    <div class="cg"><small>Markout horizon</small><div class="dd" id="hordd"></div></div>
+    <div class="cg"><small>&nbsp;</small><button id="csv" class="ibtn" title="Export the current pool list as CSV"><i data-ic="download" data-s="15"></i>Export</button></div>
+  </div>
+  <select id="chain" hidden></select>
+</div></header>
+<div class="wrap">
+
+<div class="sub" id="upd" style="margin-bottom:10px"></div><div id="alerts"></div><div id="errb" class="alert err" hidden></div>
+<div class="hero card glow" id="hero"><div><h2>See where LP capital actually works</h2><p>On Metric, LPs choose their bins, but only bins that trade earn spread. This map shows how much of each pool is working and how much sits idle.</p></div>
+<div class="steps"><div><span class="si"><i data-ic="map"></i></span><b>1 · Scan the map</b><small>Green tiles are efficient pools, red tiles hold idle capital.</small></div><div><span class="si"><i data-ic="chart"></i></span><b>2 · Open a pool</b><small>Click a tile to see its liquidity by price and its risk profile.</small></div><div><span class="si"><i data-ic="sliders"></i></span><b>3 · Plan a position</b><small>Use the simulators to size a deposit or test a trade.</small></div></div>
+<button id="heroX" class="btn-ghost"><i data-ic="check" data-s="15"></i>Got it</button></div>
+<div class="stats" id="stats"></div>
+<div class="tabs" id="tabs"><button data-t="market" class="on"><i data-ic="map"></i>Market Map</button><button data-t="rank"><i data-ic="trophy"></i>Rankings</button><button data-t="xc"><i data-ic="globe"></i>Cross-Chain</button><button data-t="analyzer"><i data-ic="chart"></i>Pool Analyzer</button><button data-t="wallet"><i data-ic="wallet"></i>My Wallet</button></div>
+<div id="pane-market"><div class="card glow" style="margin-bottom:16px"><h3 style="margin-top:0">Efficiency Market Map <span class="ctl"><span class="sub">Tile size:</span><div class="seg" id="tsz"><button data-z="tvl" class="on">TVL</button><button data-z="idle">Idle capital</button></div></span></h3>
+<div class="legend"><span>Tile color = Efficiency Score</span><span>0 idle</span><div style="height:8px;width:220px;border-radius:6px;background:linear-gradient(90deg,hsl(0 65% 32%),hsl(72 65% 32%),hsl(145 65% 32%))"></div><span>100 efficient</span><span>· click a tile to open its liquidity map</span></div><div class="tmap" id="tmap"></div></div></div>
+<div id="pane-rank" hidden><div class="g2" id="lb"></div></div>
+<div id="pane-xc" hidden><div id="xc"></div></div>
+<div id="pane-wallet" hidden><div class="card glow"><h3 style="margin-top:0">My Wallet Efficiency <small class="sub">read-only · on-chain</small></h3><p class="sub" style="margin-bottom:12px;line-height:1.5">Enter an address or connect a wallet. The tool finds your Metric positions on the selected chain from LiquidityAdded events, reads your live bin shares from Metric's data provider, and checks which of your bins actually traded in the selected window.</p>
+<div class="ctl"><input id="wal" placeholder="0x… wallet address" style="min-width:min(380px,100%)"><button id="walGo" class="btn-ghost"><i data-ic="search" data-s="15"></i>Analyze</button><button id="walConn"><i data-ic="wallet" data-s="15"></i>Connect wallet</button></div>
+<div id="walst" class="swst" hidden></div>
+<details style="margin-top:12px"><summary class="sub" style="cursor:pointer">Advanced: check one pool with a known salt</summary><div class="ctl" style="margin-top:10px"><input id="walSalt" placeholder="position salt (number)" style="width:200px"><button id="walMan">Check selected pool</button></div><div class="ctl" style="margin-top:10px"><input id="walRpc" placeholder="Custom RPC URL for this network (optional, faster)" style="min-width:min(380px,100%)"><button id="walRpcSave">Save RPC</button></div><div class="note">Use this if the public RPCs limit eth_getLogs to a small block range. Pick an endpoint that allows large getLogs ranges. It is stored only in your browser.</div></details></div><div id="walres"></div></div>
+<div id="pane-analyzer" hidden>
+<div class="grid">
+  <div class="card list">
+    <div class="tools">
+      <input id="q" placeholder="Search pair or address…  (press /)">
+      <div class="chips">
+        <span class="chip card" data-f="eff">Efficiency ≥ 60</span>
+        <span class="chip card" data-f="mk">Markout &gt; 0</span>
+        <span class="chip card" data-f="fee">Fee fair</span>
+        <span class="chip card" data-f="tier">Green/Yellow tier</span><span class="chip card" data-f="ok">Healthy only</span><span class="chip card" data-f="watch"><i data-ic="star" data-s="13"></i> Watchlist</span>
+      </div>
+      <select id="sort"><option value="tvl">Sort: TVL</option><option value="score">Sort: Efficiency (high)</option><option value="scoreAsc">Sort: Efficiency (low)</option><option value="idle">Sort: Idle capital</option><option value="miss">Sort: Opportunity cost</option></select>
+    </div>
+    <div id="plist"><div class="load"><div class="sp"></div>Loading pools…</div></div>
+  </div>
+  <div id="detail"><div class="card load"><div class="sp"></div>Loading…</div></div>
+</div>
+</div>
+<details class="card meth"><summary>Methodology &amp; data notes</summary><p class="note">Efficiency Score = 70% × tradedLiquidityShare + 30% × (tradedBins ÷ fundedBins). Idle capital = TVL × (1 − tradedLiquidityShare). "Fee fair" = protocol + curator spread fee ≤ 40%. Metric's public API returns bin counts per window, not a per-bin trade log, so the heatmap shows real per-bin liquidity from live depth and marks the bins nearest the current price as active in proportion to tradedBins/fundedBins (an estimate). Opportunity cost = idle capital × max(0, markout APR of traded bins). Uniform-bin APR = markout APR × tradedLiquidityShare. Trend snapshots are stored only in your browser. APR of a window where only a small bin traded can be extreme, so opportunity cost and the simulator are hidden when traded share is under 2%. Not financial advice.</p></details>
+<div class="toast" id="toast"></div>
+</div>
+<script>
+const API='https://api.metric.xyz/public/v1';
+/* ===== RPC endpoints (built in) =====
+   Used for on-chain swap events and wallet positions. Endpoints are tried in order and the last one that worked is reused.
+   To use a private endpoint (Alchemy, QuickNode...), put its URL at the front of the list for that chain. */
+const CONFIG={RPC:{
+ 1:['https://ethereum-rpc.publicnode.com','https://eth.llamarpc.com','https://1rpc.io/eth','https://rpc.ankr.com/eth','https://cloudflare-eth.com'],
+ 56:['https://bsc-rpc.publicnode.com','https://1rpc.io/bnb','https://rpc.ankr.com/bsc','https://bsc-dataseed.binance.org'],
+ 4663:['https://rpc.mainnet.chain.robinhood.com']
+},
+/* Block explorers with an Etherscan-style getLogs API (no key). Used automatically when an RPC limits eth_getLogs to small block ranges. */
+EXPLORER:{1:'https://eth.blockscout.com/api',4663:'https://robinhoodchain.blockscout.com/api'}};
+const $=s=>document.querySelector(s);
+const IC={map:'<polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/>',trophy:'<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>',chart:'<path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',refresh:'<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>',download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',star:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',alert:'<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',badge:'<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/>',link:'<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',snow:'<line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/><path d="m20 16-4-4 4-4"/><path d="m4 8 4 4-4 4"/><path d="m16 4-4 4-4-4"/><path d="m8 20 4-4 4 4"/>',users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',db:'<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/>',wallet:'<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>',gauge:'<path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/>',percent:'<line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>',swap:'<path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/>',activity:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',shield:'<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>',sliders:'<line x1="21" y1="4" x2="14" y2="4"/><line x1="10" y1="4" x2="3" y2="4"/><line x1="21" y1="12" x2="12" y2="12"/><line x1="8" y1="12" x2="3" y2="12"/><line x1="21" y1="20" x2="16" y2="20"/><line x1="12" y1="20" x2="3" y2="20"/><line x1="14" y1="2" x2="14" y2="6"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="16" y1="18" x2="16" y2="22"/>',grid:'<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>',box:'<path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>',compare:'<circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M11 18H8a2 2 0 0 1-2-2V9"/>',check:'<path d="M20 6 9 17l-5-5"/>','chev-d':'<path d="m6 9 6 6 6-6"/>','chev-l':'<path d="m15 18-6-6 6-6"/>','chev-r':'<path d="m9 18 6-6-6-6"/>',settings:'<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',globe:'<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',search:'<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>'};
+const ic=(n,z=16,c='')=>`<svg class="ic ${c}" width="${z}" height="${z}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[n]||''}</svg>`;
+const CHAIN_NAME={1:'Ethereum',56:'BNB Chain',4663:'Robinhood Chain',8453:'Base',42161:'Arbitrum One',999:'HyperEVM',137:'Polygon',43114:'Avalanche',143:'Monad',4326:'MegaETH',99901:'Elysium'};
+const CI={1:['#627eea','<path d="M16 5.5 9.5 16.3 16 20l6.5-3.7z" fill="#fff"/><path d="m16 21.4-6.5-3.8L16 26.5l6.5-8.9z" fill="#fff" opacity=".7"/>'],56:['#f3ba2f','<path d="m16 7 2.6 2.6L16 12.2l-2.6-2.6zM9.8 13.2 12.4 16l-2.6 2.8L7 16zm12.4 0L25 16l-2.8 2.8-2.6-2.8zM16 19.8l2.6 2.6L16 25l-2.6-2.6zm0-6.2 2.4 2.4-2.4 2.4-2.4-2.4z" fill="#14151a"/>'],4663:['#00c805','<path d="M9 23c0-7.5 5-12.5 14-13-.8 8-5.8 13.5-12 13.5L9 26z" fill="#0b1a0c"/>']};
+const chainIconFb=(id,z=20)=>{const c=CI[id];return c?`<svg class="cico" width="${z}" height="${z}" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="16" fill="${c[0]}"/>${c[1]}</svg>`:`<span class="cico fb" style="width:${z}px;height:${z}px;font-size:${Math.round(z*.5)}px">${(CHAIN_NAME[id]||'?')[0]}</span>`};
+const TW='https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/',LL='https://icons.llamao.fi/icons/chains/rsz_';
+/* Logos: Trust Wallet assets (ETH, BNB, Base, Arbitrum, Polygon, Avalanche), DefiLlama icons (newer chains), Robinhood's own Chain feather symbol. Each one falls back to the built-in mark if it cannot load. */
+const CL={1:TW+'ethereum/info/logo.png',56:TW+'smartchain/info/logo.png',8453:TW+'base/info/logo.png',42161:TW+'arbitrum/info/logo.png',137:TW+'polygon/info/logo.png',43114:TW+'avalanchec/info/logo.png',999:LL+'hyperliquid.jpg',143:LL+'monad.jpg',4326:LL+'megaeth.jpg',4663:'https://cdn.robinhood.com/assets/generated_assets/hoodchain_docsite/feather-light.svg'};
+const chainIcon=(id,z=20)=>{const u=CL[id],fb=chainIconFb(id,z);if(!u)return fb;return`<span class="cico lg2${id===4663?' rh':''}" style="width:${z}px;height:${z}px"><img class="cimg" src="${u}" alt="" width="${z}" height="${z}" loading="lazy" referrerpolicy="no-referrer" data-fb="${esc(fb)}"></span>`};
+const chainName=id=>((S.chains||[]).find(c=>c.chainId===id)||{}).name||CHAIN_NAME[id]||('Chain '+id);
+const hint=t=>`<i class="hint" data-t="${t}">${ic('info',13)}</i>`;
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('on'),1800)}
+function copyLink(){navigator.clipboard?navigator.clipboard.writeText(location.href).then(()=>toast('Link copied'),()=>toast('Copy failed')):toast('Copy not supported')}
+
+const S={chain:1,w:'7d',h:'5m',pools:[],sel:null,f:new Set(),depth:{},sw:{},swp:{},swe:{},step:{},lim:{},good:{},xc:{},chains:[],me:{},seq:0};
+const LS={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let watch=LS.get('lem_watch',[]),snap=LS.get('lem_snap',{});
+const usd=n=>n==null?'—':n>=1e6?'$'+(n/1e6).toFixed(2)+'M':n>=1e3?'$'+(n/1e3).toFixed(1)+'k':'$'+n.toFixed(0);
+const pct=n=>n==null?'—':(n*100).toFixed(1)+'%';
+const col=s=>s==null?'#5a6080':s>=65?'var(--g)':s>=35?'var(--y)':'var(--r)';
+function met(p){const m=p.markoutByWindow?.[S.w]?.byHorizon?.[S.h]||{};const tls=m.tradedLiquidityShare;const tvl=p.tvlFiat||0;
+ let score=null;if(tls!=null){const br=m.fundedBins?(m.tradedBins||0)/m.fundedBins:0;score=Math.round(100*(.7*tls+.3*Math.min(1,br)))}
+ return{m,tls,tvl,score,idle:tls==null?null:tvl*(1-tls),miss:(tls==null||m.aprBps==null||tls<.02)?null:tvl*(1-tls)*Math.max(0,m.aprBps)/1e4,mk:m.markoutFiat,apr:m.aprBps,tb:m.tradedBins,fb:m.fundedBins,vol:p.volumeByWindow?.[S.w],
+ fee:(p.spreadProtocolFeeE6==null&&p.spreadAdminFeeE6==null)?null:((p.spreadProtocolFeeE6||0)+(p.spreadAdminFeeE6||0))/1e6}}
+async function j(u,n=2){const c=new AbortController(),t=setTimeout(()=>c.abort(),20000);try{const r=await fetch(u,{signal:c.signal});if((r.status===429||r.status>=500)&&n){const ra=+r.headers.get('Retry-After');await new Promise(z=>setTimeout(z,Math.min(10,ra||1.5)*1e3));return j(u,n-1)}if(!r.ok)throw new Error(r.status+' '+await r.text());return r.json()}finally{clearTimeout(t)}}
+const scoreOf=x=>x.tradedLiquidityShare==null?null:Math.round(100*(.7*Math.min(1,Math.max(0,x.tradedLiquidityShare))+.3*Math.min(1,x.fundedBins?(x.tradedBins||0)/x.fundedBins:0)));
+async function chains(){let list=[{chainId:1,name:'Ethereum'},{chainId:56,name:'BSC'}];
+ try{const r=await j(API+'/chains');const a=Array.isArray(r)?r:(r.data||r.chains||[]);if(a.length)list=a.map(c=>typeof c==='number'?{chainId:c,name:'Chain '+c}:{chainId:c.chainId??c.chain_id??c.id,name:c.name||c.chain||'Chain '+(c.chainId??c.id)})}catch(e){}
+ S.chains=list.map(c=>{const id=+c.chainId,n=String(c.name||'');return{chainId:id,name:esc(CHAIN_NAME[id]||(n?n[0].toUpperCase()+n.slice(1):'Chain '+id))}});$('#chain').innerHTML=S.chains.map(c=>`<option value="${c.chainId}">${c.name}</option>`).join('');S.chain=S.chains[0].chainId;chainUI()}
+function sanitize(p,c){['pair','token0Symbol','token1Symbol','adminUsername','chain'].forEach(k=>{if(p[k]!=null)p[k]=esc(p[k])});for(const k of['token0','token1']){const u=p[k+'LogoUrl'],q=p[k+'BrandColor'];p[k+'LogoUrl']=/^https:\/\//.test(u||'')?esc(u):null;p[k+'BrandColor']=/^#[0-9a-fA-F]{3,8}$/.test(q||'')?q:null}p._c=c}
+async function fetchPools(c){let all=[],off=0;for(let i=0;i<4;i++){const r=await j(`${API}/evm/${c}/metadata?count=500&offset=${off}&sortBy=tvl&include24h=true&minTvlFiat=100`);all=all.concat(r.data);if(r.nextOffset==null)break;off=r.nextOffset}all.forEach(p=>sanitize(p,c));return all}
+async function load(silent){if(silent&&S.demo)return;const my=++S.seq;if(!silent)S.demo=false;if(!silent)$('#plist').innerHTML='<div class="load"><div class="sp"></div>Fetching live pools…</div>';
+ try{const all=await fetchPools(S.chain);if(my!==S.seq)return;S.pools=all;if(!silent)S.depth={};S.ts=new Date();
+  const fd=S.sel&&all.find(p=>p.poolAddress.toLowerCase()===S.sel.toLowerCase());if(fd)S.sel=fd.poolAddress;else S.sel=(all.slice().sort((a,b)=>(b.tvlFiat||0)-(a.tvlFiat||0))[0]||{}).poolAddress;
+  render(silent);
+ }catch(e){if(silent||my!==S.seq)return;const net=/Failed to fetch|NetworkError|Load failed|aborted/i.test(String(e.message)),fl=location.protocol==='file:';
+  $('#plist').innerHTML=`<div class="load">${ic('alert',30)}<b>Could not load the Metric API</b><small>${esc(String(e.message).slice(0,140))}</small>${net?`<small style="line-height:1.5;max-width:320px;text-align:center">The browser could not reach api.metric.xyz.${fl?' You opened the file directly. Serve it with <code>python3 -m http.server</code> and open http://localhost:8000 instead.':' Check your connection, VPN or ad blocker.'}</small>`:''}<div class="ctl"><button onclick="load()">Retry</button><button onclick="demo()">View demo data</button></div></div>`;$('#detail').innerHTML='';$('#tmap').style.height='120px';$('#tmap').innerHTML='<div class="load">Waiting for live data…</div>'}}
+function snapAll(){const h=LS.get('lem_hist',{}),t=Math.floor(Date.now()/6e4);S.pools.forEach(p=>{const m=met(p);if(m.score==null)return;const k=S.chain+':'+p.poolAddress+':'+S.w+S.h,a=h[k]||[];if(a.length&&t-a[a.length-1][0]<10)return;a.push([t,m.score]);h[k]=a.slice(-60)});LS.set('lem_hist',h)}
+function squarify(items,W,H){const tot=items.reduce((t,i)=>t+i.v,0),k=W*H/tot,n=items.map(i=>({d:i,a:i.v*k})),out=[];let x=0,y=0,w=W,h=H,i=0;
+ const worst=(row,len)=>{const t=row.reduce((q,r)=>q+r.a,0),mx=Math.max(...row.map(r=>r.a)),mn=Math.min(...row.map(r=>r.a));return Math.max(len*len*mx/(t*t),t*t/(len*len*mn))};
+ while(i<n.length){const len=Math.min(w,h),row=[n[i]];let j=i+1;while(j<n.length&&worst([...row,n[j]],len)<=worst(row,len)){row.push(n[j]);j++}
+  const t=row.reduce((q,r)=>q+r.a,0);
+  if(w>=h){const rw=t/h;let yy=y;row.forEach(r=>{const rh=r.a/rw;out.push({d:r.d,x,y:yy,w:rw,h:rh});yy+=rh});x+=rw;w-=rw}
+  else{const rh=t/w;let xx=x;row.forEach(r=>{const rw=r.a/rh;out.push({d:r.d,x:xx,y,w:rw,h:rh});xx+=rw});y+=rh;h-=rh}
+  i=j}
+ return out}
+function tm(){if(S.tab&&S.tab!=='market')return;const el=$('#tmap'),mode=S.tmSize||'tvl',a=S.pools.map(p=>({p,m:met(p)})).map(x=>({...x,v:mode==='idle'?(x.m.idle||0):x.m.tvl})).filter(x=>x.v>0).sort((x,y)=>y.v-x.v).slice(0,70);
+ if(!a.length){el.style.height='80px';el.innerHTML='<div class="load">No data for this view.</div>';return}
+ const W=el.clientWidth||900,H=Math.min(460,Math.max(300,W*.45));el.style.height=H+'px';
+ el.classList.toggle('quiet',!!S.quiet);
+ el.innerHTML=squarify(a,W,H).map((r,i)=>{const x=r.d,sc=x.m.score,w=r.w-2,h=r.h-2,hue=Math.round((sc??0)*1.45),bg=sc==null?'linear-gradient(145deg,#3a3f5c,#262a42)':`linear-gradient(145deg,hsl(${hue} 62% 37%),hsl(${hue} 68% 22%))`,big=w>150&&h>105,mid=w>88&&h>58,tier=x.p.classificationSummary?.tierQualification||'';
+  const body=big?`<div class="row">${pair2(x.p,20)}<b>${x.p.pair}</b></div><div class="sc">${sc??'N/A'}<small>/100</small></div><div class="meta">${usd(x.m.tvl)} TVL · ${usd(x.m.idle)} idle</div><div class="bar2"><i style="width:${((x.m.tls||0)*100).toFixed(0)}%"></i></div>`:mid?`<div class="row">${pair2(x.p,15)}<b>${x.p.pair}</b></div><div class="sc s2">${sc??'N/A'}</div>`:(w>34&&h>28?`<div class="sc s3">${sc??''}</div>`:'');
+  return`<div class="tile ${x.p.poolAddress===S.sel?'sel':''}" data-a="${x.p.poolAddress}" data-t="<b>${x.p.pair}</b><br>Efficiency ${sc??'N/A'}/100<br>TVL ${usd(x.m.tvl)} · Idle ${usd(x.m.idle)}<br>Traded liquidity ${pct(x.m.tls)}<br>Markout APR ${x.m.apr==null?'—':(x.m.apr/100).toFixed(1)+'%'}<br>Tier ${tier||'—'}" style="left:${r.x}px;top:${r.y}px;width:${Math.max(0,w)}px;height:${Math.max(0,h)}px;background:${bg};animation-delay:${i*14}ms"><i class="tdot ${tier}"></i>${body}</div>`}).join('')}
+$('#tsz').onclick=e=>{const b=e.target.closest('button');if(!b)return;S.tmSize=b.dataset.z;[...$('#tsz').children].forEach(x=>x.classList.toggle('on',x===b));tm()};
+let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(tm,200)});
+function render(silent){S.quiet=!!silent;
+ if(!S.pools.length){$('#plist').innerHTML='<div class="load">No pools returned for this chain yet.</div>';$('#stats').innerHTML='';$('#tmap').style.height='120px';$('#tmap').innerHTML='<div class="load">No pools to map.</div>';return}
+ $('#upd').innerHTML='<span class="live"></span>'+(S.demo?'<b style="color:var(--y)">DEMO DATA, not live</b> · ':'Live · ')+chainName(S.chain)+' · '+S.pools.length+' pools · auto-updates every 60s · last '+(S.ts?S.ts.toLocaleTimeString():'');
+ const foc=silent&&document.activeElement&&document.activeElement.closest&&document.activeElement.closest('#detail');
+ [['history',snapAll],['stats',()=>{stats();stats2()}],['alerts',alerts],['pool list',list],['market map',tm],['pool detail',()=>{if(!foc&&!(silent&&$('#arc')))detail()}],['comparison',cmp],['rankings',lb],['cross-chain',()=>{if(S.tab==='xc')xcRender()}]].forEach(x=>sf(x[1],x[0]))}
+function count(el,to,fmt){if(S.quiet){el.textContent=fmt(to);return}const t0=performance.now();(function f(t){const k=Math.min(1,(t-t0)/900),e=1-Math.pow(1-k,3);el.textContent=fmt(to*e);if(k<1)requestAnimationFrame(f)})(t0)}
+function stats(){const ms=S.pools.map(met),ok=ms.filter(m=>m.score!=null),tvl=ms.reduce((a,m)=>a+m.tvl,0),idle=ok.reduce((a,m)=>a+m.idle,0);
+ const w=ok.reduce((a,m)=>a+m.tvl,0),avg=w?ok.reduce((a,m)=>a+m.score*m.tvl,0)/w:0;
+ $('#stats').innerHTML=[['Pools analyzed',S.pools.length,n=>Math.round(n)],['Total TVL',tvl,usd],['Idle capital ('+S.w+')',idle,usd],['TVL-weighted efficiency',avg,n=>n.toFixed(0)+'/100']].map((x,i)=>`<div class="card stat${S.quiet?' noa':''}" style="animation-delay:${i*80}ms"><span class="si">${ic(['db','wallet','snow','gauge'][i],18)}</span><small>${x[0]}</small><b data-i="${i}">0</b></div>`).join('');
+ [['Pools analyzed',S.pools.length,n=>Math.round(n)],['',tvl,usd],['',idle,usd],['',avg,n=>n.toFixed(0)+'/100']].forEach((x,i)=>count($(`[data-i="${i}"]`),x[1],x[2]))}
+function alerts(){let h='';S.pools.forEach(p=>{if(!watch.includes(p.poolAddress))return;const m=met(p),k=S.chain+':'+p.poolAddress+':'+S.w+S.h;
+ if(m.score!=null&&snap[k]!=null&&snap[k]-m.score>=10)h+=`<div class="alert">${ic('alert',16)} ${p.pair}: efficiency dropped ${snap[k]} → ${m.score} since your last visit.</div>`;if(m.score!=null)snap[k]=m.score});LS.set('lem_snap',snap);$('#alerts').innerHTML=h}
+function filtered(){const q=$('#q').value.toLowerCase();let a=S.pools.filter(p=>!q||p.pair.toLowerCase().includes(q)||p.poolAddress.toLowerCase().includes(q));
+ a=a.filter(p=>{const m=met(p);return(!S.f.has('eff')||(m.score??-1)>=60)&&(!S.f.has('mk')||(m.mk??-1)>0)&&(!S.f.has('fee')||(m.fee!=null&&m.fee<=.4))&&(!S.f.has('tier')||['green','yellow'].includes(p.classificationSummary?.tierQualification))&&(!S.f.has('ok')||(p.priceProviderStatus==='healthy'&&!p.pauseLevel))&&(!S.f.has('watch')||watch.includes(p.poolAddress))});
+ const s=$('#sort').value,v=p=>{const m=met(p);return s==='tvl'?m.tvl:s==='idle'?m.idle??-1:s==='miss'?m.miss??-1:m.score??(s==='scoreAsc'?999:-1)};
+ return a.sort((x,y)=>s==='scoreAsc'?v(x)-v(y):v(y)-v(x))}
+function list(){const a=filtered();if(S.pgSel!==S.sel){const i0=a.findIndex(p=>p.poolAddress===S.sel);if(i0>=0)S.pg.list=Math.floor(i0/12)+1;S.pgSel=S.sel}const PG=pgSlice('list',a,12);$('#plist').innerHTML=PG.rows.map(p=>{const m=met(p);return`<div class="pool ${p.poolAddress===S.sel?'sel':''}" data-a="${p.poolAddress}">
+ <span class="star ${watch.includes(p.poolAddress)?'on':''}" data-star="${p.poolAddress}">${ic('star',16)}</span>
+ <div><div class="nm">${pair2(p,20)}${p.pair}</div><div class="mt">${usd(m.tvl)} TVL · ${p.priceProviderStatus&&p.priceProviderStatus!=='healthy'?ic('alert',12)+' '+p.priceProviderStatus+' · ':''}${p.poolAddress.slice(0,6)}…${p.poolAddress.slice(-4)}</div></div>
+ <div class="sc" style="color:${col(m.score)}">${m.score ?? 'N/A'}<div class="bar"><i style="width:${m.score||0}%;background:${col(m.score)}"></i></div></div></div>`}).join('')+PG.html||'<div class="load">No pools match.</div>'}
+function detail(){const p=S.pools.find(x=>x.poolAddress===S.sel);if(!p)return;const m=met(p),R=70,C=2*Math.PI*R;
+ S.stab=S.stab||'ov';const rec=[];const Hh=LS.get('lem_hist',{})[S.chain+':'+p.poolAddress+':'+S.w+S.h]||[];const spark=Hh.length<2?'<div class="sub">Trend builds from snapshots recorded in your browser (one every 10+ min while the page is open). Keep it open or revisit.</div>':(()=>{const t0=Hh[0][0],t1=Hh[Hh.length-1][0],d=t1-t0||1,pts=Hh.map(x=>((x[0]-t0)/d*560+20).toFixed(1)+","+(70-x[1]*.6).toFixed(1)).join(" ");return `<svg viewBox="0 0 600 80" style="width:100%"><polyline points="${pts}" fill="none" stroke="var(--g)" stroke-width="2.5" stroke-linejoin="round"/></svg><div class="sub">${Hh.length} snapshots · ${((t1-t0)/60).toFixed(1)}h span · latest ${Hh[Hh.length-1][1]}</div>`})();try{history.replaceState(null,"","#"+S.chain+"/"+p.poolAddress)}catch(e){}const W=['24h','7d','30d'].map(w=>scoreOf(p.markoutByWindow?.[w]?.byHorizon?.[S.h]||{}));
+ const wb=W.map((v,i)=>`<div><span class="lbl">Efficiency ${['24h','7d','30d'][i]}</span><div class="bar" style="width:100%;height:8px;margin:8px 0"><i style="width:${v||0}%;background:${col(v)}"></i></div><b>${v??'N/A'}</b></div>`).join('');
+ const a24=p.analytics24h||{},pc=v=>v==null?'—':(v/100).toFixed(1)+'%';
+ const facts=[['LP APR 7d',pc(p.aprBps7d)],['Trading P&L APR 7d',pc(p.tradingPnlAprBps7d)],['Fees 24h',usd(a24.feesFiat)],['Swaps 24h',a24.swapTxCount??'—'],['Spread fee share',pct(m.fee)],['Curator',(p.adminUsername||'unnamed')+(p.verifiedAdmin?' '+ic('badge',14,'ok'):'')],['Price status',p.priceProviderStatus||'—'],['Paused',p.pauseLevel?'Yes':'No'],['Current bin',p.curBinIdx??'—'],['Locked pricing',p.lockedPricing?'Yes':'No'],['Deposit allowlist',p.depositWhitelistingEnabled?'Yes':'No']].map(f=>`<div><span class="lbl">${f[0]}</span><b style="font-size:15px">${f[1]}</b></div>`).join('');
+ if(W[0]!=null&&W[1]!=null&&W[1]-W[0]>=15)rec.push(['bad',`Efficiency is falling: ${W[1]} (7d) → ${W[0]} (24h). Liquidity is drifting away from where trades happen.`]);
+ if(m.score==null)rec.push(['warn','Not enough settled data in this window yet (needs ≥5 min and ≥70% priced volume). Try another window or horizon.']);
+ else{
+  if(m.score>=65)rec.push(['good','Capital is working hard here: most liquidity sits in bins that actually trade.']);
+  if(m.score<35)rec.push(['bad','Efficiency is very low. A large share of LP funds sits in bins that rarely or never trade.']);
+  if(m.idle>m.tvl*.5)rec.push(['bad',`About ${usd(m.idle)} (${pct(m.idle/m.tvl)}) of TVL was idle in the last ${S.w}. Avoid far-out bins; concentrate near the active zone.`]);
+  if(m.mk!=null)rec.push([m.mk>0?'good':'bad',`Markout ${S.h} is ${m.mk>0?'positive':'negative'} (${usd(Math.abs(m.mk))}) over ${S.w}: LPs ${m.mk>0?'kept':'lost'} money vs the reference price.`]);
+  if(m.fee>.4)rec.push(['warn',`Spread fee share is ${pct(m.fee)} (protocol + curator), above the 40% "fair" threshold.`]);
+  rec.push(['good','Focus on the green bins in the map: they sit closest to the current price, where swaps cross.']);
+  if(m.fb&&m.tb<m.fb*.4)rec.push(['warn',`Only ${m.tb} of ${m.fb} funded bins traded. Consider withdrawing from the grey outer bins.`])}
+ if(p.pauseLevel)rec.unshift(['bad','Pool is paused: swaps are blocked.']);if(p.priceProviderStatus&&p.priceProviderStatus!=='healthy')rec.unshift(['bad','Price provider status: '+p.priceProviderStatus+' — pool is not quotable right now.']);
+ $('#detail').innerHTML=`<div class="card glow">
+ <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px"><div><div class="lbl">Selected pool</div><div style="font-size:26px;font-weight:700">${pair2(p,34)}${p.pair} <span class="pg" style="background:${({green:"#2dffb033",yellow:"#ffc85733",red:"#ff5d7a33"})[p.classificationSummary?.tierQualification]||"#ffffff14"}">${p.classificationSummary?.tierQualification||'—'}</span></div><div class="mt sub">${p.poolAddress}</div></div><button onclick="copyLink()">${ic('link',15)} Copy link</button></div>
+ <div class="top"><div class="ring"><svg width="170" height="170"><circle cx="85" cy="85" r="${R}" stroke="#ffffff12" stroke-width="12" fill="none"/><circle id="arc" cx="85" cy="85" r="${R}" stroke="${col(m.score)}" stroke-width="12" fill="none" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C}" style="transition:stroke-dashoffset 1.3s cubic-bezier(.2,.8,.2,1);filter:drop-shadow(0 0 8px ${col(m.score)})"/></svg><div class="v"><b id="sv">0</b><small class="lbl">Efficiency${hint('Score 0-100 = 70% traded liquidity share + 30% traded bins over funded bins.')}</small></div></div>
+ <div class="kv"><div><span class="lbl">Traded liquidity${hint('Share of pool liquidity that sits in bins which had at least one swap in this window (tradedLiquidityShare).')}</span><b>${pct(m.tls)}</b></div><div><span class="lbl">Traded / funded bins${hint('Bins with at least one swap, divided by bins that held liquidity.')}</span><b>${m.tb??'—'} / ${m.fb??'—'}</b></div><div><span class="lbl">TVL</span><b>${usd(m.tvl)}</b></div><div><span class="lbl">Volume ${S.w}</span><b>${usd(m.vol)}</b></div><div><span class="lbl">Markout ${S.h}${hint('What LPs kept from swaps, checked against the reference price a fixed horizon later. A past measurement, not realized profit.')}</span><b class="${m.mk>0?'pos':m.mk<0?'neg':''}">${m.mk==null?'—':usd(m.mk)}</b></div><div><span class="lbl">Markout APR${hint('Markout annualized over the liquidity of bins that traded. Not a forecast.')}</span><b>${m.apr==null?'—':(m.apr/100).toFixed(1)+'%'}</b></div></div></div>
+ <div class="idle">${m.idle==null?'Idle capital unavailable for this window.':`Idle Capital Detector: this pool has about <strong>${usd(m.idle)}</strong> of liquidity not used in the last ${S.w} (${pct(1-m.tls)} of TVL). ${m.miss!=null?`At this pool's active-bin markout APR, that is roughly <strong>${usd(m.miss)}/yr</strong> of opportunity cost (estimate from past markout).`:''}`}</div>
+ <div class="tabs" id="stabs">${[['ov','Overview','grid'],['map','Liquidity Map','box'],['tools','LP Tools','sliders'],['cmp','Compare Pools','compare'],['risk','Risk & Facts','shield']].map(t=>`<button data-s="${t[0]}" class="${S.stab===t[0]?'on':''}">${ic(t[2],15)}${t[1]}</button>`).join('')}</div>
+ <div class="pane" data-s="ov" ${S.stab==='ov'?'':'hidden'}><h3>Efficiency across windows</h3><div class="kv">${wb}</div><h3>Efficiency trend <small class="sub">local snapshots</small></h3>${spark}<h3>Recommendations for LPs</h3><div class="rec">${rec.map((r,i)=>`<div class="${r[0]}" style="animation-delay:${i*90}ms">${r[1]}</div>`).join('')}</div></div>
+ <div class="pane" data-s="map" ${S.stab==='map'?'':'hidden'}><div id="swst" class="swst ld">Preparing on-chain data…</div><div class="kv" id="chainkpi"></div><h3>Liquidity Map by price <span class="legend"><span><i style="background:var(--g)"></i>Active</span><span><i style="background:#5a6080"></i>Idle</span><span><i style="border:2px solid var(--c)"></i>Current price</span></span></h3>
+ <div id="hm" class="hm"><div class="load" style="width:100%"><div class="sp"></div></div></div><div class="kv" id="conc" style="margin-top:12px"></div><div id="hot"></div><h3>3D Liquidity Landscape <small class="sub">drag to rotate · glowing green ridge = active liquidity · violet = idle</small></h3><canvas id="t3d" width="900" height="360"></canvas></div>
+ <div class="pane" data-s="tools" ${S.stab==='tools'?'':'hidden'}><h3>LP Simulator · concentration premium</h3><div><input id="dep" type="number" value="${S.dep||10000}" min="1" style="width:160px"> <span class="sub">USD deposit</span><div class="kv" id="sim" style="margin-top:10px"></div></div><h3>Trade Impact Simulator <small class="sub">walks live bin depth</small></h3><div><select id="tside"><option value="sell">Sell ${p.token0Symbol||'token0'}</option><option value="buy" ${S.tside==='buy'?'selected':''}>Buy ${p.token0Symbol||'token0'}</option></select> <input id="tamt" type="number" value="${S.tamt||10000}" min="1" style="width:150px"> <span class="sub">USD</span><div class="kv" id="timp" style="margin-top:10px"><div class="note" style="grid-column:1/-1;background:none">Waiting for live depth…</div></div></div></div>
+ <div class="pane" data-s="cmp" ${S.stab==='cmp'?'':'hidden'}><div id="cmp"></div></div>
+ <div class="pane" data-s="risk" ${S.stab==='risk'?'':'hidden'}><h3>Pool facts <small class="sub">tier: ${p.classificationSummary?.tierQualification||'—'}${(p.classificationSummary?.reasonCodes||[]).length?' · '+p.classificationSummary.reasonCodes.join(', '):''}</small></h3><div class="kv">${facts}</div><h3>Risk &amp; fee anatomy</h3>${riskHTML(p)}</div>
+ </div>`;
+ requestAnimationFrame(()=>{$('#arc').style.strokeDashoffset=C*(1-(m.score||0)/100);count($('#sv'),m.score||0,n=>m.score==null?'N/A':Math.round(n))});
+ sim();requestAnimationFrame(()=>moveInd($('#stabs')));heat(p,m)}
+async function heat(p,m){let el=$('#hm');if(!el)return;let d=S.depth[p.poolAddress];
+ try{if(!d)d=S.depth[p.poolAddress]=await j(`${API}/evm/${S.chain}/${p.poolAddress}/bid_ask`)}catch(e){el=$('#hm');if(el)el.innerHTML='<div class="load" style="width:100%">Depth unavailable: '+esc(String(e.message).slice(0,90))+'</div>';return}
+ if(S.sel!==p.poolAddress)return;el=$('#hm');if(!el)return;
+ if(!d.depth||!(d.depth.bids||[]).length&&!(d.depth.asks||[]).length){el.innerHTML='<div class="load" style="width:100%">Pool is not quotable (status: '+d.priceProviderStatus+').</div>';return}
+ if(p.token0Decimals==null||p.token1Decimals==null||!p.token0FiatPrice||!p.token1FiatPrice){el.innerHTML='<div class="load" style="width:100%">Token decimals or USD price unavailable: depth cannot be valued.</div>';return}
+ const side=(lv,dec,px)=>{let prev=0n,out=[];for(const l of lv){const c=BigInt(l.cumulativeVolume),dl=c-prev;if(c>prev)prev=c;out.push({bin:l.binIdx,px:Number(BigInt(l.price))/18446744073709551616,usd:dl>0n?Number(dl)/10**dec*px:0,imp:Number(l.priceImpactE6)/1e4})}while(out.length&&!out[out.length-1].usd)out.pop();return out};
+ const bids=side(d.depth.bids||[],p.token1Decimals??6,p.token1FiatPrice),asks=side(d.depth.asks||[],p.token0Decimals??18,p.token0FiatPrice);
+ const r=m.fb?Math.min(1,(m.tb||0)/m.fb):0,SW=S.sw[S.chain+':'+p.poolAddress+':'+S.w],mark=a=>{if(SW)return a.map(x=>({...x,on:x.usd>0&&SW.bins.has(x.bin),st:SW.bins.get(x.bin)}));const nf=a.filter(x=>x.usd>0).length,q=Math.max(m.tb?1:0,Math.ceil(r*nf));let c=0;return a.map(x=>({...x,on:x.usd>0&&c++<q}))};
+ const cells=[...mark(bids).reverse().map(x=>({...x,s:'Bid'})),...mark(asks).map(x=>({...x,s:'Ask'}))];
+ const tot=cells.reduce((a,c)=>a+c.usd,0)||1,within=x=>cells.filter(c=>c.imp<=x).reduce((a,c)=>a+c.usd,0)/tot,act=cells.filter(c=>c.on),idleU=cells.filter(c=>!c.on).reduce((a,c)=>a+c.usd,0),reach=Math.max(0,...act.map(c=>c.imp));
+ $('#conc').innerHTML=[['Depth within 0.1%',pct(within(.1))],['Depth within 0.5%',pct(within(.5))],['Depth within 1%',pct(within(1))],['Active zone reach','±'+reach.toFixed(2)+'%'],['Idle-zone depth',usd(idleU)+' ('+pct(idleU/tot)+')'],['Quoted depth',usd(tot)]].map(f=>`<div><span class="lbl">${f[0]}</span><b style="font-size:15px">${f[1]}</b></div>`).join('');
+ if(!bids.length||!asks.length)$('#conc').insertAdjacentHTML('beforeend','<div style="grid-column:1/-1;background:none;padding:0" class="note">One side has no depth (closed or empty). Status: '+d.priceProviderStatus+'.</div>');const mx=Math.max(...cells.map(c=>c.usd),1),mid=bids.length;
+ el.className='';el.style.cssText='';
+ const bidP=Number(BigInt(d.bidAdj||'0'))/18446744073709551616,askP=Number(BigInt(d.askAdj||'0'))/18446744073709551616,nb=bids.length;
+ const E=cells.map((c,i)=>{let lo,hi;if(c.s==='Bid'){hi=i===nb-1?bidP:cells[i+1].px;lo=c.px}else{lo=i===nb?askP:cells[i-1].px;hi=c.px}return{...c,lo,hi}}).filter(c=>isFinite(c.lo)&&isFinite(c.hi)&&c.hi>c.lo);
+ if(!E.length){el.innerHTML='<div class="load" style="width:100%">No priced bins to draw.</div>';return}
+ const xl=Math.min(...E.map(c=>c.lo)),xh=Math.max(...E.map(c=>c.hi)),X=v=>44+(v-xl)/(xh-xl)*836,mp=(bidP>0&&askP>0)?(bidP+askP)/2:(xl+xh)/2,fp=v=>v>=1000?v.toFixed(0):v>=1?v.toFixed(2):v.toPrecision(3);
+ const ac=E.filter(c=>c.on),zl=ac.length?Math.min(...ac.map(c=>c.lo)):mp,zh=ac.length?Math.max(...ac.map(c=>c.hi)):mp,pc=v=>((v/mp-1)*100).toFixed(1)+'%';
+ const bars=E.map((c,i)=>{if(!c.usd)return'';const h=Math.max(3,c.usd/mx*190),x=X(c.lo);return`<rect class="dot bar" x="${x.toFixed(1)}" y="${(236-h).toFixed(1)}" width="${Math.max(1.5,X(c.hi)-x-1).toFixed(1)}" height="${h.toFixed(1)}" rx="2" fill="${c.on?'url(#gA)':'#6a7099'}" opacity="${c.on?(.6+.4*c.usd/mx).toFixed(2):.55}" style="animation-delay:${i*14}ms" data-t="${c.s} bin ${c.bin}<br>Price ${fp(c.lo)} – ${fp(c.hi)}<br>Liquidity ${usd(c.usd)}<br>${SW?`Swap steps ${c.st?c.st.n:0} · Volume ${usd(c.st?c.st.usd:0)}<br>${c.on?'Traded':'No swaps in window'}`:(c.on?'Active zone (estimated)':'Idle zone (estimated)')}"/>`}).join('');
+ const ME=S.me[S.chain+':'+p.poolAddress],mks=ME?E.filter(c=>ME.has(c.bin)).map(c=>`<circle cx="${((X(c.lo)+X(c.hi))/2).toFixed(1)}" cy="247" r="3.5" fill="#fff"/>`).join(''):'';const ticks=[0,1,2,3,4].map(q=>{const v=xl+q*(xh-xl)/4;return`<line x1="${X(v)}" x2="${X(v)}" y1="236" y2="242" stroke="#8c93b8"/><text x="${X(v)}" y="256" fill="#8c93b8" font-size="11" text-anchor="middle">${fp(v)}</text><text x="${X(v)}" y="270" fill="#6c7398" font-size="10" text-anchor="middle">${pc(v)}</text>`}).join('');
+ el.innerHTML=`<svg viewBox="0 0 900 280" style="width:100%"><defs><linearGradient id="gA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2dffb0"/><stop offset="1" stop-color="#0a8f6a"/></linearGradient></defs><rect x="${X(zl)}" y="20" width="${Math.max(2,X(zh)-X(zl))}" height="216" fill="#2dffb012" stroke="#2dffb055" stroke-dasharray="4"/><text x="${X(zl)+6}" y="34" fill="#2dffb0" font-size="11">${SW?'Traded range':'Active zone (est.)'} ${pc(zl)} … ${pc(zh)}</text><line x1="40" x2="884" y1="236" y2="236" stroke="#ffffff26"/>${bars}${mks}<line x1="${X(mp)}" x2="${X(mp)}" y1="14" y2="236" stroke="#38d6ff" stroke-width="2" stroke-dasharray="5 4"/><text x="${X(mp)+6}" y="50" fill="#38d6ff" font-size="11">Price ${fp(mp)}</text>${ticks}</svg><div class="sub">${E.filter(c=>c.usd).length} funded bins · ${ac.length} ${SW?'traded on-chain':'in active zone (estimated)'} · price in ${p.token1Symbol||'token1'} per ${p.token0Symbol||'token0'}</div>`;terrain(E,mx);timpact();chainKpi(p,E,SW);ensureSwaps(p,m)}
+const RC={bin_width_exceeded:'Bins wider than 1%',stop_loss_missing:'No StopLoss extension',stop_loss_uninitialized:'StopLoss not initialized',stop_loss_mutable:'StopLoss settings can still change',stop_loss_drawdown_exceeded:'StopLoss drawdown above 15%',stop_loss_decay_exceeded:'StopLoss decay above 15%/day',app_missing:'Price provider is not Anchored',app_mutable:'Anchored provider params can change',feed_staleness_exceeded:'Feed staleness bound above 15s',price_provider_mutable:'Price provider can be changed',curator_unverified:'Curator not verified by Metric',curator_not_creator:'Curator is not the creator',remove_liquidity_extension_present:'Extension runs on liquidity removal',anchored_feed_unmatched:'Feeds not confirmed for pool tokens',multiplier_feed_miswired:'Multiplier feed mis-wired',multiplier_token_unscaled:'Tokenized stock not priced by Multiplier Oracle'};
+const fp2=v=>v>=1000?v.toFixed(2):v>=1?v.toFixed(4):v.toPrecision(4);
+function riskHTML(p){const rc=p.classificationSummary?.reasonCodes||[],e=p.extensionDetails||{},d=p.priceProviderDetails||{},pr=p.spreadProtocolFeeE6,ad=p.spreadAdminFeeE6,lp=(pr==null&&ad==null)?null:Math.max(0,1e6-(pr||0)-(ad||0))/1e4;
+ const bar=lp==null?'<div class="sub">Spread fee split unavailable.</div>':`<div style="display:flex;height:14px;border-radius:8px;overflow:hidden;margin:6px 0"><i style="width:${(pr||0)/1e4}%;background:var(--p)"></i><i style="width:${(ad||0)/1e4}%;background:var(--c)"></i><i style="width:${lp}%;background:var(--g)"></i></div><div class="legend"><span><i style="background:var(--p)"></i>Protocol ${((pr||0)/1e4).toFixed(1)}%</span><span><i style="background:var(--c)"></i>Curator ${((ad||0)/1e4).toFixed(1)}%</span><span><i style="background:var(--g)"></i>LPs keep ${lp.toFixed(1)}% of the spread</span></div>`;
+ const bits=[['Price provider',d.providerType?d.providerType+(d.feedMode?' · '+d.feedMode:''):'—'],['Params mutable',d.mutableParams==null?'—':d.mutableParams?'Yes':'No'],['StopLoss drawdown',e.stopLoss?.drawdownE6!=null?(+e.stopLoss.drawdownE6/1e4).toFixed(1)+'%':'None'],['Price velocity guard',e.priceVelocity?'On':'None'],['Notional fee',(p.protocolNotionalFeeE8==null&&p.adminNotionalFeeE8==null)?'—':(((p.protocolNotionalFeeE8||0)+(p.adminNotionalFeeE8||0))/1e6).toFixed(3)+'%'],['Extensions',(p.extensions||[]).length]].map(x=>`<div><span class="lbl">${x[0]}</span><b style="font-size:15px">${x[1]}</b></div>`).join('');
+ const t=p.classificationSummary?.tierQualification,chips=rc.length?rc.map(c=>`<span class="chip card" title="${c}" style="color:var(--y);border-color:#ffc85766;background:#ffc85714">${RC[c]||c}</span>`).join(''):(t==='green'?'<span class="pos">No risk flags: pool qualifies as green.</span>':'<span class="sub">No reason codes returned (tier: '+(t||'—')+').</span>');
+ return`<div class="chips" style="margin-bottom:10px">${chips}</div>${bar}<div class="kv" style="margin-top:10px">${bits}</div>`}
+function timpact(){const el=$('#timp'),p=S.pools.find(x=>x.poolAddress===S.sel),d=S.depth[S.sel];if(!el||!p||!d||!d.depth||!$('#tside'))return;
+ const sell=$('#tside').value==='sell',u=+$('#tamt').value||0,pi=sell?p.token0FiatPrice:p.token1FiatPrice,po=sell?p.token1FiatPrice:p.token0FiatPrice,di=sell?p.token0Decimals:p.token1Decimals,dout=sell?p.token1Decimals:p.token0Decimals,msg=t=>{el.innerHTML=`<div class="note" style="grid-column:1/-1;background:none">${t}</div>`};
+ if(!pi||!po||di==null||dout==null||u<=0)return msg('Enter a USD amount (token prices and decimals are required).');
+ const best=Number(BigInt((sell?d.bidAdj:d.askAdj)||'0'))/18446744073709551616;if(!best||best>1e30)return msg('This side is not quotable right now (status: '+d.priceProviderStatus+').');
+ const lv=sell?d.depth.bids:d.depth.asks,inRaw=BigInt(Math.floor(u/pi*10**di));let pin=0n,pout=0n,out=null,bins=0;
+ for(const l of lv){const ci=BigInt(l.cumulativeInputVolume),co=BigInt(l.cumulativeVolume);if(ci<=pin)continue;bins++;if(inRaw<=ci){out=pout+(co-pout)*(inRaw-pin)/(ci-pin);break}pin=ci;pout=co}
+ if(out==null)return msg('Order exceeds quoted depth. Only about '+usd(Number(pin)/10**di*pi)+' can be filled on this side right now.');
+ const inA=Number(inRaw)/10**di,outA=Number(out)/10**dout,avg=sell?outA/inA:inA/outA,imp=sell?(1-avg/best)*100:(avg/best-1)*100;
+ el.innerHTML=[['Side',(sell?'Sell ':'Buy ')+(p.token0Symbol||'token0')],['You receive',usd(outA*po)],['Avg price',fp2(avg)],['Best price',fp2(best)],['Price impact',imp.toFixed(3)+'%'],['Bins crossed',bins]].map(x=>`<div><span class="lbl">${x[0]}</span><b style="font-size:15px">${x[1]}</b></div>`).join('')+'<div class="note" style="grid-column:1/-1;background:none;padding:0">Lower-bound estimate from live depth (linear inside the last bin). Check bid/ask again right before trading.</div>'}
+function terrain(E,mx){cancelAnimationFrame(S.raf);const cv=$('#t3d');if(!cv)return;const g=cv.getContext('2d'),W=cv.width,H=cv.height,n=E.length,nb=E.filter(c=>c.s==='Bid').length,M=Math.min(110,Math.max(40,n*3)),ev=E.map(c=>c.usd/mx);
+ const raw=[],on=[];for(let i=0;i<M;i++){const u=n>1?i/(M-1)*(n-1):0,a=Math.floor(u),b=Math.min(n-1,a+1),t=u-a,q=t*t*(3-2*t);raw.push(ev[a]*(1-q)+ev[b]*q);on.push(E[Math.round(u)].on)}
+ const sm=raw.map((v,i)=>{let t=0,w=0;for(let k=-2;k<=2;k++){const j=i+k;if(j<0||j>=M)continue;const q=[1,2,3,2,1][k+2];t+=raw[j]*q;w+=q}return t/w});
+ const R=9,SX=640/M,SZ=54,HH=150,env=j=>{const z=j/R*2-1;return Math.pow(Math.max(0,1-z*z),1.2)};let ang=.55,tilt=.62,dx=null,dy=null;
+ cv.onmousedown=e=>{dx=e.clientX;dy=e.clientY;cv.style.cursor='grabbing'};addEventListener('mouseup',()=>{dx=null;cv.style.cursor='grab'});
+ cv.onmousemove=e=>{if(dx!=null){ang+=(e.clientX-dx)*.008;tilt=Math.min(1.2,Math.max(.15,tilt+(e.clientY-dy)*.005));dx=e.clientX;dy=e.clientY}};
+ const P=(x,y,z)=>{const c=Math.cos(ang),s=Math.sin(ang),X=x*c-z*s,Z=x*s+z*c,ct=Math.cos(tilt),st=Math.sin(tilt),Y=y*ct+Z*st,Z2=-y*st+Z*ct,f=800/(800+Z2);return[W/2+X*f,H*.68-Y*f,Z2]},ln=(a,b)=>{g.beginPath();g.moveTo(a[0],a[1]);g.lineTo(b[0],b[1]);g.stroke()};
+ const frame=()=>{if(!document.body.contains(cv))return;if(!cv.offsetParent){S.raf=requestAnimationFrame(frame);return}if(dx==null)ang+=.004;g.clearRect(0,0,W,H);g.lineWidth=1;g.strokeStyle='rgba(120,140,255,.14)';
+  for(let i=0;i<=12;i++){const x=(-M/2+i*M/12)*SX;ln(P(x,0,-SZ*1.6),P(x,0,SZ*1.6))}for(const z of[-1.6,0,1.6])ln(P(-M/2*SX,0,z*SZ),P(M/2*SX,0,z*SZ));
+  const V=[];for(let i=0;i<M;i++){V.push([]);for(let j=0;j<=R;j++){const h=sm[i]*HH*env(j);V[i].push({h,p:P((i-M/2)*SX,h,(j/R*2-1)*SZ*1.6)})}}
+  const Q=[];for(let i=0;i<M-1;i++)for(let j=0;j<R;j++){const c=[V[i][j],V[i+1][j],V[i+1][j+1],V[i][j+1]],h=c.reduce((a,v)=>a+v.h,0)/4/HH;if(h<.004)continue;Q.push({c,z:c.reduce((a,v)=>a+v.p[2],0)/4,h,a:on[i]})}
+  Q.sort((a,b)=>b.z-a.z).forEach(q=>{g.beginPath();q.c.forEach((v,k)=>k?g.lineTo(v.p[0],v.p[1]):g.moveTo(v.p[0],v.p[1]));g.closePath();g.fillStyle=q.a?`hsl(${(172-q.h*38).toFixed(0)} 85% ${(26+q.h*42).toFixed(0)}%)`:`hsl(${(245+q.h*25).toFixed(0)} 32% ${(22+q.h*34).toFixed(0)}%)`;g.globalAlpha=.93;g.fill();g.globalAlpha=1;g.strokeStyle='rgba(255,255,255,.09)';g.stroke()});
+  g.beginPath();for(let i=0;i<M;i++){const p=V[i][Math.round(R/2)].p;i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1])}g.strokeStyle='#b6ffee';g.lineWidth=2;g.shadowColor='#2dffb0';g.shadowBlur=12;g.stroke();g.shadowBlur=0;g.lineWidth=1;
+  const px=((n>1?(nb-.5)/(n-1):.5)*(M-1)-M/2)*SX,q=[P(px,0,-SZ*1.6),P(px,0,SZ*1.6),P(px,185,SZ*1.6),P(px,185,-SZ*1.6)];g.beginPath();q.forEach((a,k)=>k?g.lineTo(a[0],a[1]):g.moveTo(a[0],a[1]));g.closePath();g.fillStyle='rgba(56,214,255,.14)';g.fill();g.strokeStyle='#38d6ff';g.stroke();
+  const t=P(px,195,0);g.fillStyle='#38d6ff';g.font='12px JetBrains Mono,monospace';g.fillText('current price',t[0]-32,t[1]);
+  S.raf=requestAnimationFrame(frame)};frame()}
+function stats2(){const f=S.pools.reduce((a,p)=>a+(p.analytics24h?.feesFiat||0),0),sw=S.pools.reduce((a,p)=>a+(p.analytics24h?.swapTxCount||0),0),hl=S.pools.length?S.pools.filter(p=>p.priceProviderStatus==='healthy'&&!p.pauseLevel).length/S.pools.length*100:0,it=[['Fees 24h',f,usd],['Swaps 24h',sw,n=>Math.round(n).toLocaleString()],['Healthy pools',hl,n=>n.toFixed(0)+'%']];
+ $('#stats').insertAdjacentHTML('beforeend',it.map((x,i)=>`<div class="card stat${S.quiet?' noa':''}" style="animation-delay:${(i+4)*80}ms"><span class="si">${ic(['percent','swap','activity'][i],18)}</span><small>${x[0]}</small><b data-j="${i}">0</b></div>`).join(''));it.forEach((x,i)=>count($(`[data-j="${i}"]`),x[1],x[2]))}
+(()=>{const cv=document.createElement('canvas');cv.id='bg';document.body.prepend(cv);const g=cv.getContext('2d'),red=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches);let W,H,ps=[],t=0;const rs=()=>{W=cv.width=innerWidth;H=cv.height=innerHeight;ps=Array.from({length:70},()=>({x:Math.random()*W,y:Math.random()*H,z:Math.random()+.3,v:Math.random()*.3+.1}))};rs();addEventListener('resize',rs);
+ (function f(){t+=.012;g.clearRect(0,0,W,H);const hz=H*.62;g.strokeStyle='rgba(56,214,255,.14)';g.lineWidth=1;for(let i=-20;i<=20;i++){g.beginPath();g.moveTo(W/2+i*20,hz);g.lineTo(W/2+i*170,H);g.stroke()}
+  for(let k=0;k<14;k++){const p=((k+t*4)%14)/14,y=hz+(H-hz)*p*p;g.globalAlpha=.08+p*.22;g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke()}g.globalAlpha=1;
+  ps.forEach(p=>{p.y-=p.v;if(p.y<0){p.y=H;p.x=Math.random()*W}g.fillStyle='rgba(45,255,176,'+(.2+.3*p.z).toFixed(2)+')';g.beginPath();g.arc(p.x+Math.sin(t+p.y*.01)*10,p.y,p.z*1.6,0,7);g.fill()});
+  if(!red)requestAnimationFrame(f)})()})();
+const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function tk(p,k,z){const u=p['token'+k+'LogoUrl'],sy=p['token'+k+'Symbol']||'?',c=p['token'+k+'BrandColor']||'#4a5080',ch=(sy.replace(/&[a-z#0-9]+;/g,'?')[0]||'?').toUpperCase();
+ return u?`<img class="tl" src="${u}" width="${z}" height="${z}" loading="lazy" alt="${ch}" data-c="${c}">`:`<span class="tl fb" style="width:${z}px;height:${z}px;background:${c}">${ch}</span>`}
+const pair2=(p,z=22)=>`<span class="pp">${tk(p,0,z)}${tk(p,1,z)}</span>`;
+addEventListener('error',e=>{const t=e.target;if(t&&t.tagName==='IMG'&&t.classList.contains('cimg')&&t.parentNode){t.parentNode.outerHTML=t.dataset.fb;return}if(t&&t.tagName==='IMG'&&t.classList.contains('tl')){const sp=document.createElement('span');sp.className='tl fb';sp.style.cssText=`width:${t.width}px;height:${t.height}px;background:${t.dataset.c||'#4a5080'}`;sp.textContent=t.alt||'?';t.replaceWith(sp)}},true);
+function setTab(t){S.tab=t;['market','rank','xc','analyzer','wallet'].forEach(x=>{$('#pane-'+x).hidden=x!==t});[...$('#tabs').children].forEach(b=>b.classList.toggle('on',b.dataset.t===t));if(t==='market')tm();if(t==='xc')xcOpen();if(t==='wallet')rpcUI();requestAnimationFrame(()=>{moveInd($('#tabs'));moveInd($('#stabs'))})}
+$('#tabs').onclick=e=>{const b=e.target.closest('button');if(b)setTab(b.dataset.t)};
+document.addEventListener('click',e=>{const b=e.target.closest('#stabs button');if(!b)return;S.stab=b.dataset.s;document.querySelectorAll('#stabs button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('.pane[data-s]').forEach(x=>{x.hidden=x.dataset.s!==S.stab});moveInd($('#stabs'))});
+const T_BIN='0xcad09799f755048f0fd388c6b2fcc8e0cebefd15756c6903522cc2a95f661f70',T_ADD='0xa55772434bee2a347743b1e8086fa44bac69a060e124ec92ab6b9cc7fc5268af',M128=(1n<<128n)-1n;
+const rpcList=c=>{const u=(LS.get('lem_rpc',{})[c]||'').trim();return(/^https:\/\//.test(u)?[u]:[]).concat((CONFIG.RPC[c]||[]).filter(x=>x!==u))},hx=n=>'0x'+n.toString(16),sgn=(v,b)=>v>=(1n<<BigInt(b-1))?v-(1n<<BigInt(b)):v,w32=x=>{let v=BigInt(x);if(v<0n)v+=1n<<256n;return v.toString(16).padStart(64,'0')},wa=a=>a.toLowerCase().replace('0x','').padStart(64,'0'),isAddr=a=>/^0x[0-9a-fA-F]{40}$/.test(a||'');
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const parseLim=m=>{m=String(m);const r=m.match(/(\d[\d,]*)\s*(?:-|\u2013|to)\s*(\d[\d,]*)/);if(r){const a=+r[1].replace(/,/g,''),b=+r[2].replace(/,/g,'');if(b>a)return b-a}const n=(m.match(/\d[\d,]*/g)||[]).map(v=>+v.replace(/,/g,'')).filter(v=>v>0&&v<=1e7);return n.length?Math.max(...n):0};
+async function rpcAt(u,method,params){const r=await fetch(u,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method,params})});let x;if(!r.ok){try{x=await r.json()}catch(_){}if(!x||!x.error)throw new Error('HTTP '+r.status)}else x=await r.json();
+ if(x.error){const e=new Error(x.error.message||'RPC error');e.rpcErr=1;if(method==='eth_getLogs'&&/range|limit|exceed|too many|more than|results|size|10000|blocks?/i.test(e.message)){e.rangeErr=1;if(/block/i.test(e.message)&&!/result|response|cap of/i.test(e.message)){const l=parseLim(e.message);if(l)e.limit=l}}throw e}return x.result}
+async function rpc(c,method,params){const urls=rpcList(c);if(!urls.length){const e=new Error('No built-in RPC endpoint for chain '+c);e.noRpc=1;throw e}let last;const st=S.good[c]||0;
+ for(const u of urls.map((_,i)=>urls[(i+st)%urls.length])){try{const r=await rpcAt(u,method,params);S.good[c]=urls.indexOf(u);return r}catch(e){last=e}}throw last}
+const blk=async(c,n)=>{const b=await rpc(c,'eth_getBlockByNumber',[n==='latest'?'latest':hx(n),false]);return{n:parseInt(b.number,16),t:parseInt(b.timestamp,16)}};
+async function blockAt(c,ts,lo,hi){let a=await blk(c,lo),b=await blk(c,hi);if(ts>=b.t)return hi;if(ts<=a.t)return lo;let it=0;while(hi-lo>1&&it++<40){let mid=it%3?Math.floor(lo+(ts-a.t)*(hi-lo)/Math.max(1,b.t-a.t)):Math.floor((lo+hi)/2);mid=Math.min(hi-1,Math.max(lo+1,mid));const m=await blk(c,mid);if(m.t<=ts){lo=mid;a=m}else{hi=mid;b=m}}return lo}
+async function scanRpcs(c,filter,from,to,onP){const urls=rpcList(c);if(!urls.length)throw Object.assign(new Error('No built-in RPC endpoint for chain '+c),{noRpc:1});
+ const span=to-from+1,out=[],retry=[],dead=new Set(),PER=2;let cur=from,done=0,inflight=0,last,abort=null;
+ const left=()=>Math.max(0,to-cur+1)+retry.reduce((t,r)=>t+r[1]-r[0]+1,0);
+ const feasible=()=>{const th=urls.filter(u=>!dead.has(u)).reduce((t,u)=>t+(S.lim[u]||2e5)*PER,0);return th>0&&left()/th<=1500};
+ const take=u=>{const st=Math.max(1,S.lim[u]||S.step[u]||50000);if(retry.length){const r=retry.pop(),n=r[1]-r[0]+1;if(n<=st)return r;retry.push([r[0]+st,r[1]]);return[r[0],r[0]+st-1]}if(cur>to)return null;const a=cur,b=Math.min(to,a+st-1);cur=b+1;return[a,b]};
+ const work=async u=>{let fails=0;
+  while(!abort&&!dead.has(u)){const r=take(u);if(!r){if(!inflight&&!retry.length)return;await sleep(60);continue}
+   inflight++;
+   try{const rs=await rpcAt(u,'eth_getLogs',[{...filter,fromBlock:hx(r[0]),toBlock:hx(r[1])}]);out.push(...rs);done+=r[1]-r[0]+1;fails=0;onP&&onP(Math.min(1,done/span));if(!S.lim[u]){const st=S.step[u]||50000;if(st<5e5)S.step[u]=Math.floor(st*1.5)}}
+   catch(e){retry.push(r);last=e;
+    if(e.rangeErr&&r[1]>r[0]){const len=r[1]-r[0]+1;if(e.limit&&e.limit<len)S.lim[u]=e.limit;else S.step[u]=S.lim[u]=Math.max(1,Math.floor(len/2));
+     if(!feasible())abort=Object.assign(new Error('RPC block range limit too small'),{tooSmall:1})}
+    else{fails++;if(fails>=3)dead.add(u);else await sleep(400*fails)}}
+   finally{inflight--}}};
+ await Promise.all(urls.flatMap(u=>Array.from({length:PER},()=>work(u))));
+ if(abort)throw abort;
+ if(cur<=to||retry.length)throw last||new Error('No RPC endpoint available');
+ return out}
+async function explorerScan(c,filter,from,to,onP){const base=CONFIG.EXPLORER[c];if(!base)throw new Error('no explorer for this chain');
+ const span=to-from+1,q4=[];let cov=0,n=0;const gate=async f=>{if(n>=4)await new Promise(r=>q4.push(r));n++;try{return await f()}finally{n--;const x=q4.shift();x&&x()}};
+ const get=async(a,b)=>{const q=new URLSearchParams({module:'logs',action:'getLogs',fromBlock:String(a),toBlock:String(b)});if(filter.address)q.set('address',filter.address);filter.topics.forEach((t,i)=>{if(t){q.set('topic'+i,t);if(i>0)q.set('topic0_'+i+'_opr','and')}});
+  for(let k=0;;k++){const r=await fetch(base+'?'+q.toString());if((r.status===429||r.status>=500)&&k<3){await sleep(900*(k+1));continue}if(!r.ok)throw new Error('explorer HTTP '+r.status);const x=await r.json();if(Array.isArray(x.result))return x.result;if(/no logs/i.test(x.message||''))return[];if(/rate|busy|timeout/i.test(x.message||'')&&k<3){await sleep(900*(k+1));continue}throw new Error(x.message||'explorer error')}};
+ const one=async(a,b,d)=>{const res=await gate(()=>get(a,b));if(res.length>=1000&&b>a&&d<30){const m=Math.floor((a+b)/2);return(await Promise.all([one(a,m,d+1),one(m+1,b,d+1)])).flat()}cov+=b-a+1;onP&&onP(Math.min(1,cov/span));return res.map(l=>({address:l.address,topics:(l.topics||[]).filter(Boolean),data:l.data,blockNumber:l.blockNumber,removed:false}))};
+ const out=await one(from,to,0);onP&&onP(1);return out}
+async function getLogs(c,filter,from,to,onP,opt={}){if(to<from)return[];const hasEx=!!CONFIG.EXPLORER[c];let tried=false,exErr,rpcErr;
+ const ex=async()=>{tried=true;try{return await explorerScan(c,filter,from,to,onP)}catch(e){exErr=e}};
+ if(hasEx&&(opt.exFirst||to-from+1>2e5)){const r=await ex();if(r)return r}
+ try{return await scanRpcs(c,filter,from,to,onP)}catch(e){rpcErr=e}
+ if(hasEx&&!tried){const r=await ex();if(r)return r}
+ const lim=Object.values(S.lim).filter(Boolean).sort((x,y)=>x-y)[0];
+ throw new Error(rpcErr&&rpcErr.tooSmall?`The RPC endpoints only allow about ${lim||'a few'} blocks per log query, too small to scan ${(to-from+1).toLocaleString()} blocks${exErr?' (block explorer also failed: '+String(exErr.message).slice(0,80)+')':''}. Open "Advanced" below and paste a custom RPC URL with a larger getLogs range.`:((rpcErr||exErr||{}).message||'No RPC endpoint available'))}
+async function ecallMany(c,to,datas){if(!datas.length)return[];const urls=rpcList(c),st=S.good[c]||0;
+ for(const u of urls.map((_,i)=>urls[(i+st)%urls.length])){try{const out=[];for(let i=0;i<datas.length;i+=25){const part=datas.slice(i,i+25),r=await fetch(u,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(part.map((d,k)=>({jsonrpc:'2.0',id:k,method:'eth_call',params:[{to,data:d},'latest']})))});if(!r.ok)throw new Error('HTTP '+r.status);const x=await r.json();if(!Array.isArray(x))throw new Error('batch unsupported');x.sort((p,q)=>p.id-q.id);x.forEach(y=>{if(y.error||y.result==null)throw new Error('call failed');out.push(y.result)})}S.good[c]=urls.indexOf(u);return out}catch(e){}}
+ return pmap(datas,d=>ecall(c,to,d),6)}
+async function pmap(a,f,n=6){const o=[];let i=0;await Promise.all(Array.from({length:Math.min(n,a.length)},async()=>{while(i<a.length){const k=i++;o[k]=await f(a[k],k)}}));return o}
+const ecall=(c,to,data)=>rpc(c,'eth_call',[{to,data},'latest']);
+async function winBlocks(c,p,w){const lat=await blk(c,'latest'),secs={'24h':86400,'7d':604800,'30d':2592000}[w],cr=p.createdBlockNumber||0,ct=p.createdTimestamp||0,t0=secs?lat.t-secs:0;let from=cr;if(secs&&t0>ct)from=await blockAt(c,t0,cr,lat.n);return{from,to:lat.n,fromTs:Math.max(t0,ct),toTs:lat.t}}
+function loadSwaps(p,onP){const c=S.chain,w=S.w,key=c+':'+p.poolAddress+':'+w;if(S.swp[key])return S.swp[key];
+ return S.swp[key]=(async()=>{const W=await winBlocks(c,p,w),logs=await getLogs(c,{address:p.poolAddress,topics:[T_BIN]},W.from,W.to,onP),dd=Math.max(18,p.token0Decimals??18,p.token1Decimals??18),bins=new Map();let n=0,tot=0;
+  for(const l of logs){if(l.removed)continue;const d=l.data.slice(2),bi=Number(sgn(BigInt('0x'+d.slice(0,64)),256)),dw=BigInt('0x'+d.slice(64,128)),d0=sgn(dw>>128n,128),d1=sgn(dw&M128,128),v=d0>0n?Number(d0)/10**dd*(p.token0FiatPrice||0):(d1>0n?Number(d1)/10**dd*(p.token1FiatPrice||0):0),o=bins.get(bi)||{n:0,usd:0};o.n++;o.usd+=v;bins.set(bi,o);n++;tot+=v}
+  const r={bins,n,usd:tot,...W,at:Date.now()};S.sw[key]=r;return r})().finally(()=>{delete S.swp[key]})}
+const setSw=(k,h)=>{const e=$('#swst');if(e){e.className='swst '+k;e.innerHTML=h}};
+function ensureSwaps(p,m){if(S.demo){setSw('err',`${ic('alert',16)} Demo data: on-chain activity is not available, showing an estimate.`);return}const key=S.chain+':'+p.poolAddress+':'+S.w,r=S.sw[key],er=S.swe[key];if(r&&Date.now()-r.at<6e5)return;
+ if(er&&Date.now()-er.at<12e4){setSw('err',`${ic('alert',16)} Could not read on-chain swaps (${esc(er.msg)}). Showing estimated activity. <button onclick="retrySwaps()">Retry</button>`);return}
+ if(S.swp[key])return;setSw('ld','<div class="sp" style="width:16px;height:16px;border-width:2px"></div> Reading on-chain swaps… 0%');
+ loadSwaps(p,f=>{if(S.sel===p.poolAddress)setSw('ld',`<div class="sp" style="width:16px;height:16px;border-width:2px"></div> Reading on-chain swaps… ${Math.round(f*100)}%`)}).then(()=>{delete S.swe[key];if(S.sel===p.poolAddress&&S.chain+':'+p.poolAddress+':'+S.w===key)heat(p,m)}).catch(e=>{S.swe[key]={at:Date.now(),msg:String(e.message).slice(0,140)};if(S.sel===p.poolAddress)setSw('err',`${ic('alert',16)} Could not read on-chain swaps (${esc(S.swe[key].msg)}). Showing estimated activity. <button onclick="retrySwaps()">Retry</button>`)})}
+function chainKpi(p,E,SW){const el=$('#chainkpi'),hot=$('#hot');if(!el||!hot)return;if(!SW){el.innerHTML='';hot.innerHTML='';return}
+ const F=E.filter(c=>c.usd>0),T=F.filter(c=>c.on),tot=F.reduce((a,c)=>a+c.usd,0)||1,sh=T.reduce((a,c)=>a+c.usd,0)/tot,sc=Math.round(100*(.7*sh+.3*(F.length?T.length/F.length:0))),m=met(p),kv=(l,v,h)=>`<div><span class="lbl">${l}${hint(h)}</span><b style="font-size:15px">${v}</b></div>`;
+ el.innerHTML=kv('On-chain efficiency',sc+'/100','70% share of today\'s liquidity sitting in bins that traded + 30% traded bins over funded bins, computed from BinSwapped events.')+kv('Traded bins (on-chain)',SW.bins.size+(m.tb!=null?' · API '+m.tb:''),'Distinct bins with a BinSwapped event in this window, next to the API figure.')+kv('Liquidity in traded bins',pct(sh)+(m.tls!=null?' · API '+pct(m.tls):''),'Share of the liquidity quoted now that sits in bins which traded. The API weighs liquidity as it was over time.')+kv('Swap steps',SW.n.toLocaleString(),'One step per bin that a swap crossed.')+kv('Volume (on-chain)',usd(SW.usd)+(m.vol!=null?' · API '+usd(m.vol):''),'Token amounts entering bins, valued at current token prices.');
+ const H=[...SW.bins.entries()].sort((a,b)=>b[1].usd-a[1].usd).slice(0,6);
+ hot.innerHTML=H.length?`<h3>Hot bins <small class="sub">where swaps actually happened</small></h3><div class="tw"><table><tr><th>Bin</th><th>Price range</th><th>Swap steps</th><th>Volume</th><th>Liquidity now</th></tr>${H.map(([b,s])=>{const c=E.find(x=>x.bin===b);return`<tr><td>${b}</td><td>${c?fp2(c.lo)+' – '+fp2(c.hi):'—'}</td><td>${s.n}</td><td>${usd(s.usd)}</td><td>${c?usd(c.usd):'$0'}</td></tr>`}).join('')}</table></div>`:'';
+ setSw('ok',`${ic('badge',16,'ok')} <b>On-chain verified</b> · ${SW.n.toLocaleString()} BinSwapped events · blocks ${SW.from.toLocaleString()} to ${SW.to.toLocaleString()} · read ${new Date(SW.at).toLocaleTimeString()}`)}
+async function retrySwaps(){S.swe={};S.step={};if(S.pools.length)detail()}
+async function openPool(c,a){S.chain=c;$('#chain').value=String(c);chainUI();S.sel=a;setTab('analyzer');await load()}
+/* ---------- cross-chain ---------- */
+function xcOpen(){if(!S.xcTs||Date.now()-S.xcTs>12e4)xcLoad();else xcRender()}
+async function xcLoad(){const el=$('#xc');el.innerHTML='<div class="card load"><div class="sp"></div>Loading every chain…</div>';const R=await Promise.allSettled(S.chains.map(c=>c.chainId===S.chain&&S.pools.length?Promise.resolve(S.pools):fetchPools(c.chainId)));S.xc={};R.forEach((r,i)=>{if(r.status==='fulfilled')S.xc[S.chains[i].chainId]=r.value});S.xcTs=Date.now();xcRender()}
+function xcRender(){const el=$('#xc');if(!S.chains.some(c=>S.xc[c.chainId])){el.innerHTML='<div class="card load">No chain data available.</div>';return}
+ const rows=S.chains.filter(c=>S.xc[c.chainId]).map(c=>{const a=S.xc[c.chainId].map(p=>({p,m:met(p)})),ok=a.filter(x=>x.m.score!=null),wt=ok.reduce((t,x)=>t+x.m.tvl,0),b=[0,0,0,0];a.forEach(x=>{const q=x.m.score;b[q==null?3:q>=65?0:q>=35?1:2]+=x.m.tvl});
+  return{c,a,n:a.length,tvl:a.reduce((t,x)=>t+x.m.tvl,0),eff:wt?ok.reduce((t,x)=>t+x.m.score*x.m.tvl,0)/wt:null,idle:ok.reduce((t,x)=>t+x.m.idle,0),b,fees:a.reduce((t,x)=>t+(x.p.analytics24h?.feesFiat||0),0),sw:a.reduce((t,x)=>t+(x.p.analytics24h?.swapTxCount||0),0)}});
+ const cards=rows.map((r,i)=>{const T=r.b.reduce((x,y)=>x+y,0)||1,cl=['var(--g)','var(--y)','var(--r)','#5a6080'];return`<div class="card" style="animation-delay:${i*80}ms"><div class="cc"><div><div class="lbl">Chain</div><div style="font-size:22px;font-weight:700;display:flex;align-items:center;gap:8px">${chainIcon(r.c.chainId,26)}${r.c.name}</div><div class="sub">${r.n} pools · ${usd(r.tvl)} TVL</div></div></div>
+  <div class="dist">${r.b.map((v,k)=>`<i style="width:${v/T*100}%;background:${cl[k]}"></i>`).join('')}</div><div class="legend"><span><i style="background:var(--g)"></i>≥65</span><span><i style="background:var(--y)"></i>35–64</span><span><i style="background:var(--r)"></i>&lt;35</span><span><i style="background:#5a6080"></i>no data</span><span>share of TVL by efficiency</span></div>
+  <div class="kv" style="margin-top:12px"><div><span class="lbl">Efficiency</span><b style="font-size:16px;color:${col(r.eff)}">${r.eff==null?'N/A':r.eff.toFixed(0)+'/100'}</b></div><div><span class="lbl">Idle capital</span><b style="font-size:16px">${usd(r.idle)}</b></div><div><span class="lbl">Fees 24h</span><b style="font-size:16px">${usd(r.fees)}</b></div><div><span class="lbl">Swaps 24h</span><b style="font-size:16px">${r.sw.toLocaleString()}</b></div></div></div>`}).join('');
+ const all=rows.flatMap(r=>r.a.map(x=>({...x,cn:r.c.name,ci:r.c.chainId}))).filter(x=>x.m.score!=null&&x.m.tvl>=5000).sort((x,y)=>y.m.score-x.m.score).slice(0,60);
+ const PT=pgSlice('xct',all,8),top=`<div class="card" style="margin-top:16px"><h3 style="margin-top:0">${ic('trophy',18)} Most efficient pools across all chains <small class="sub">TVL ≥ $5k · window ${S.w} · horizon ${S.h}</small></h3><div class="tw"><table><tr><th>Pool</th><th>Chain</th><th>TVL</th><th>Efficiency</th><th>Idle</th><th>Markout APR</th></tr>${PT.rows.map(x=>`<tr class="cl" data-a="${x.p.poolAddress}" data-ch="${x.ci}"><td>${pair2(x.p,18)}${x.p.pair}</td><td>${chainIcon(x.ci,16)} ${x.cn}</td><td>${usd(x.m.tvl)}</td><td style="color:${col(x.m.score)}">${x.m.score}</td><td>${usd(x.m.idle)}</td><td>${x.m.apr==null?'—':(x.m.apr/100).toFixed(1)+'%'}</td></tr>`).join('')||'<tr><td colspan="6">No pools match.</td></tr>'}</table></div>${PT.html}</div>`;
+ const G={};rows.forEach(r=>r.a.forEach(x=>{if(x.m.tvl<1000)return;const g=G[x.p.pair]=G[x.p.pair]||{};if(!g[r.c.chainId]||x.m.tvl>g[r.c.chainId].m.tvl)g[r.c.chainId]={...x,ci:r.c.chainId}}));
+ const pairs=Object.entries(G).filter(([k,g])=>Object.keys(g).length>1),PS=pgSlice('xcp',pairs,8);
+ const same=`<div class="card" style="margin-top:16px"><h3 style="margin-top:0">${ic('compare',18)} Same pair on several chains</h3>${pairs.length?`<div class="tw"><table><tr><th>Pair</th>${rows.map(r=>`<th>${r.c.name}</th>`).join('')}<th>Best venue</th></tr>${PS.rows.map(([k,g])=>{const best=Object.values(g).filter(x=>x.m.score!=null).sort((a,b)=>b.m.score-a.m.score)[0];return`<tr><td>${pair2(Object.values(g)[0].p,18)}${k}</td>${rows.map(r=>{const x=g[r.c.chainId];return x?`<td class="cl" data-a="${x.p.poolAddress}" data-ch="${x.ci}" style="cursor:pointer"><span style="color:${col(x.m.score)}">${x.m.score??'N/A'}</span> · ${usd(x.m.tvl)}</td>`:'<td>—</td>'}).join('')}<td>${best?chainIcon(best.ci,16)+' '+chainName(best.ci):'—'}</td></tr>`}).join('')}</table></div>${PS.html}`:'<div class="sub">No token pair with at least $1k TVL is listed on more than one chain right now.</div>'}</div>`;
+ el.innerHTML=`<div class="g2" style="margin-top:0">${cards}</div>${top}${same}<div class="sub" style="margin-top:8px">Updated ${new Date(S.xcTs).toLocaleTimeString()} · every chain returned by the Metric API</div>`}
+/* ---------- wallet ---------- */
+const setWal=(k,h)=>{const e=$('#walst');e.hidden=false;e.className='swst '+k;e.innerHTML=h};
+async function walScan(c,addr){const key=c+':'+addr.toLowerCase(),store=LS.get('lem_wal',{}),rec=store[key]||{last:0,pos:{}};setWal('ld','<div class="sp" style="width:16px;height:16px;border-width:2px"></div> Preparing scan…');
+ const [lat,first]=await Promise.all([blk(c,'latest'),rec.last?Promise.resolve(rec.last+1):j(`${API}/evm/${c}/metadata?count=1&sortBy=created&sortOrder=asc&minTvlFiat=0`).then(r=>(r.data[0]&&r.data[0].createdBlockNumber)||0)]);
+ const logs=await getLogs(c,{topics:[T_ADD,'0x'+'0'.repeat(24)+addr.slice(2).toLowerCase()]},first,lat.n,f=>setWal('ld',`<div class="sp" style="width:16px;height:16px;border-width:2px"></div> Scanning liquidity events… ${Math.round(f*100)}%`),{exFirst:!LS.get('lem_rpc',{})[c]});
+ logs.forEach(l=>{if(l.removed)return;const salt=BigInt(l.topics[2]).toString(),k=l.address.toLowerCase()+'|'+salt,d=l.data.slice(2),off=Number(BigInt('0x'+d.slice(0,64)))*2,len=Number(BigInt('0x'+d.slice(off,off+64))),set=new Set(rec.pos[k]||[]);for(let i=0;i<len;i++)set.add(Number(sgn(BigInt('0x'+d.slice(off+64+i*64,off+128+i*64)),256)));rec.pos[k]=[...set]});
+ rec.last=lat.n;store[key]=rec;LS.set('lem_wal',store);return rec}
+async function walRun(addr,manual){const c=S.chain,out=$('#walres');if(!isAddr(addr)){setWal('err','Enter a valid 0x… address.');return}
+ out.innerHTML='';S.me={};
+ try{let pos={};if(manual)pos[manual.pool.toLowerCase()+'|'+manual.salt]=manual.bins;else pos=(await walScan(c,addr)).pos;
+  const keys=Object.keys(pos);if(!keys.length){setWal('err',`${ic('alert',16)} No Metric liquidity events found for this address on this chain. If you deposit through a custodial or router contract, positions can be owned by a different address. Use "Advanced" with a known salt.`);return}
+  setWal('ld','<div class="sp" style="width:16px;height:16px;border-width:2px"></div> Reading your live bin shares…');
+  const pools=[...new Set(keys.map(k=>k.split('|')[0]))],meta=(await j(`${API}/evm/${c}/metadata?include24h=true&count=500&addresses=${pools.join(',')}`)).data;meta.forEach(p=>sanitize(p,c));const byA={};meta.forEach(p=>byA[p.poolAddress.toLowerCase()]=p);
+  const DD=p=>Math.max(18,p.token0Decimals??18,p.token1Decimals??18),res=[];
+  await pmap(keys,async k=>{const [pa,salt]=k.split('|'),p=byA[pa];if(!p||!p.dataProviderAddress)return;const dp=p.dataProviderAddress,sh=(await ecallMany(c,dp,pos[k].map(b=>'0x2875de46'+wa(pa)+wa(addr)+w32(salt)+w32(b)))).map(BigInt),held=pos[k].map((b,i)=>({bin:b,sh:sh[i]})).filter(x=>x.sh>0n);if(!held.length)return;
+   const [A,T]=await Promise.all([ecallMany(c,dp,held.map(x=>'0x5d6dc217'+wa(pa)+w32(x.bin))),ecallMany(c,dp,held.map(x=>'0x7b06033b'+wa(pa)+w32(x.bin)))]),dd=DD(p),st=held.map((x,i)=>{const b0=BigInt('0x'+A[i].slice(2,66)),b1=BigInt('0x'+A[i].slice(66,130)),tot=BigInt(T[i]),f=tot>0n?Number(x.sh)/Number(tot):0;return{...x,val:(Number(b0)/10**dd*(p.token0FiatPrice||0)+Number(b1)/10**dd*(p.token1FiatPrice||0))*f}});
+   res.push({p,salt,held:st});S.me[c+':'+p.poolAddress]=new Set(st.map(x=>x.bin))},3);
+  if(!res.length){setWal('ok',`${ic('check',16)} Found past positions for this address, but none hold liquidity now.`);return}
+  res.forEach(r=>{r.val=r.held.reduce((t,x)=>t+x.val,0);r.idle=null;r.inr=r.held.some(x=>x.bin===r.p.curBinIdx)});res.sort((a,b)=>b.val-a.val);S.walRes={res,V:res.reduce((t,r)=>t+r.val,0),I:null,eff:null};S.pg.wal=1;walDraw();
+  setWal('ld','<div class="sp" style="width:16px;height:16px;border-width:2px"></div> Positions found. Checking which of your bins traded…');
+  let fin=0,bad=0;const SP='<div class="sp" style="width:16px;height:16px;border-width:2px"></div>',retryBtn=` <button onclick="$('#walGo').click()">Retry</button>`;
+  const sumUp=()=>{const dn=res.filter(r=>r.idle!=null),Vd=dn.reduce((t,r)=>t+r.val,0),Id=dn.reduce((t,r)=>t+r.idle,0);S.walRes={res,V:res.reduce((t,r)=>t+r.val,0),I:dn.length?Id:null,eff:dn.length&&Vd?(Vd-Id)/Vd*100:null};walDraw()};
+  await pmap(res,async r=>{try{const key=c+':'+r.p.poolAddress+':'+S.w,sw=(S.sw[key]&&Date.now()-S.sw[key].at<6e5)?S.sw[key]:await loadSwaps(r.p,f=>{if(fin<res.length)setWal('ld',`${SP} Checking which bins traded… ${fin}/${res.length} pools done`)});r.held.forEach(x=>{x.n=sw.bins.get(x.bin)?.n||0;x.traded=x.n>0});r.idle=r.held.filter(x=>!x.traded).reduce((t,x)=>t+x.val,0);r.err=null}catch(e){bad++;r.err=String(e.message).slice(0,160);r.idle=null}
+   fin++;sumUp();if(fin<res.length)setWal('ld',`${SP} Checking which bins traded… ${fin}/${res.length} pools done`)},3);
+  if(bad===res.length){setWal('err',`${ic('alert',16)} ${esc(res[0].err)}${retryBtn}`);return}
+  if(bad)setWal('err',`${ic('alert',16)} ${bad}/${res.length} pools could not be checked (${esc(res.find(r=>r.err).err)}). Showing the rest.${retryBtn}`);
+  else setWal('ok',`${ic('badge',16,'ok')} <b>On-chain verified</b> · ${res.length} position${res.length>1?'s':''} · window ${S.w} · ${new Date().toLocaleTimeString()}`);
+ }catch(e){setWal('err',`${ic('alert',16)} ${esc(String(e.message).slice(0,160))} <button onclick="$('#walGo').click()">Retry</button>`)}}
+function walDraw(){const Z=S.walRes;if(!Z)return;const res=Z.res,V=Z.V,I=Z.I,eff=Z.eff,WP=pgSlice('wal',res,6),out=$('#walres');out.innerHTML=`<div class="stats" style="margin-top:16px"><div class="card stat"><span class="si">${ic('wallet',18)}</span><small>Position value</small><b>${usd(V)}</b></div><div class="card stat"><span class="si">${ic('snow',18)}</span><small>Idle capital (${S.w})</small><b style="color:var(--r)">${usd(I)}</b></div><div class="card stat"><span class="si">${ic('gauge',18)}</span><small>Capital efficiency</small><b style="color:${col(eff)}">${eff==null?'…':eff.toFixed(0)+'%'}</b></div><div class="card stat"><span class="si">${ic('db',18)}</span><small>Positions</small><b>${res.length}</b></div></div>
+  <div class="card" style="margin-top:16px"><h3 style="margin-top:0">Your positions <small class="sub">green = bin traded in the last ${S.w}, grey = idle, outlined = current bin</small></h3><div class="tw"><table><tr><th>Pool</th><th>Salt</th><th>Value</th><th>Idle</th><th>Efficiency</th><th>Range</th><th>Your bins</th></tr>${WP.rows.map(r=>`<tr class="cl" data-a="${r.p.poolAddress}"><td>${pair2(r.p,18)}${r.p.pair}</td><td>${r.salt.length>8?r.salt.slice(0,6)+'…':r.salt}</td><td>${usd(r.val)}</td><td style="color:var(--r)">${usd(r.idle)}</td><td style="color:${r.idle==null?'var(--mu)':col(r.val?(r.val-r.idle)/r.val*100:0)}">${r.idle==null?(r.err?'n/a':'…'):(r.val?((r.val-r.idle)/r.val*100).toFixed(0):0)+'%'}</td><td>${r.inr?'<span class="pos">In range</span>':'<span class="neg">Out of range</span>'}</td><td><div class="strip">${r.held.sort((a,b)=>a.bin-b.bin).map(x=>`<i class="${x.traded===undefined?'p':x.traded?'t':''} ${x.bin===r.p.curBinIdx?'c':''} dot" data-t="Bin ${x.bin}<br>Value ${usd(x.val)}<br>Swap steps ${x.n??'checking…'}"></i>`).join('')}</div></td></tr>`).join('')}</table></div>${WP.html}<div class="note">Value uses live bin balances × your share of each bin, at current token prices. Efficiency is the share of that value sitting in bins that had at least one swap (BinSwapped event) in the window.</div></div>`;}
+$('#walGo').onclick=()=>walRun($('#wal').value.trim());
+function rpcUI(){const e=$('#walRpc');if(e)e.value=LS.get('lem_rpc',{})[S.chain]||''}
+$('#walRpcSave').onclick=()=>{const v=$('#walRpc').value.trim(),m=LS.get('lem_rpc',{});if(v&&!/^https:\/\//.test(v)){toast('Use an https:// URL');return}if(v)m[S.chain]=v;else delete m[S.chain];LS.set('lem_rpc',m);S.lim={};S.step={};toast(v?'RPC saved':'RPC cleared')};
+$('#walConn').onclick=async()=>{if(!window.ethereum){toast('No browser wallet found');return}try{const a=await window.ethereum.request({method:'eth_requestAccounts'});$('#wal').value=a[0];walRun(a[0])}catch(e){toast('Connection cancelled')}};
+$('#walMan').onclick=async()=>{const a=$('#wal').value.trim(),salt=$('#walSalt').value.trim(),p=S.pools.find(x=>x.poolAddress===S.sel);if(!isAddr(a)||!/^\d+$/.test(salt)||!p){setWal('err','Enter an address, a numeric salt, and select a pool first.');return}
+ try{let d=S.depth[S.sel];if(!d)d=S.depth[S.sel]=await j(`${API}/evm/${S.chain}/${S.sel}/bid_ask`);const bins=[...new Set([...(d.depth?.bids||[]),...(d.depth?.asks||[])].map(l=>Number(l.binIdx)))];walRun(a,{pool:S.sel,salt,bins})}catch(e){setWal('err',esc(e.message))}};
+const sf=(f,n)=>{try{f()}catch(e){report(e,n)}};
+function report(e,n){console.error(n,e);const msg=String((e&&e.message)||e).slice(0,200);if(S.lastErr===msg)return;S.lastErr=msg;S.errTxt=`Liquidity Efficiency Map\n${location.href}\n${navigator.userAgent}\nsection: ${n}\n${(e&&e.stack)||msg}`;const b=$('#errb');if(!b)return;b.hidden=false;b.innerHTML=`${ic('alert',16)} <b>Part of the page failed</b> (${esc(n)}): ${esc(msg)} <button onclick="copyErr()">Copy details</button><button onclick="$('#errb').hidden=true">Dismiss</button>`}
+function copyErr(){navigator.clipboard?navigator.clipboard.writeText(S.errTxt||'').then(()=>toast('Details copied')):toast('Copy not supported')}
+addEventListener('error',e=>{if(e.target&&e.target!==window)return;report(e.error||e.message,'script')});
+addEventListener('unhandledrejection',e=>{const r=e.reason;if(r&&r.name==='AbortError')return;report(r,'async task')});
+function genDemo(){const T=[['WETH','USDC',2700,18,6],['WBTC','USDC',64000,8,6],['WBNB','USDT',620,18,18],['cbBTC','USDC',64000,8,6],['wstETH','WETH',1.18,18,18],['ARB','USDC',.8,18,6],['LINK','USDC',14,18,6],['AAVE','USDC',210,18,6]];let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647,out=[];
+ for(let i=0;i<28;i++){const t=T[i%T.length],tls=Math.min(1,Math.max(.03,rnd()*rnd()*1.6+.05)),fb=10+Math.floor(rnd()*30),tb=Math.max(1,Math.round(fb*(.15+tls*.8))),tvl=Math.round(2000+Math.pow(rnd(),3)*900000),apr=Math.round((rnd()-.25)*4000);
+  out.push({pair:t[0]+'/'+t[1],chain:'demo',poolAddress:'0x'+(0xd000+i).toString(16).padStart(40,'0'),token0Symbol:t[0],token1Symbol:t[1],token0Decimals:t[3],token1Decimals:t[4],token0FiatPrice:t[2],token1FiatPrice:1,tvlFiat:tvl,adminUsername:['Carcosa','Orbit','Nimbus'][i%3],verifiedAdmin:i%3===0,spreadProtocolFeeE6:150000,spreadAdminFeeE6:100000+i%3*50000,priceProviderStatus:'healthy',pauseLevel:0,curBinIdx:-1,aprBps7d:apr,tradingPnlAprBps7d:Math.round(apr*.6),classificationSummary:{tierQualification:['green','yellow','red'][i%3],reasonCodes:i%3?['stop_loss_mutable']:[]},analytics24h:{feesFiat:Math.round(tvl*.0004),swapTxCount:Math.round(rnd()*900)},volumeByWindow:{'24h':tvl*(.3+rnd()),'7d':tvl*3,'30d':tvl*9,all:tvl*14},
+   markoutByWindow:Object.fromEntries(['24h','7d','30d','all'].map(w=>[w,{byHorizon:Object.fromEntries(['1m','5m','30m'].map(h=>[h,{markoutFiat:apr*tvl/1e6,aprBps:apr,tradedLiquidityShare:Math.min(1,tls*(.9+rnd()*.2)),tradedBins:tb,fundedBins:fb}]))}])),_c:S.chain})}return out}
+function demoDepth(p){const px=p.token0FiatPrice/p.token1FiatPrice,q=v=>String(BigInt(Math.round(v*1e8))*(1n<<64n)/100000000n),wt=Array.from({length:18},(_,i)=>Math.exp(-i/6)*(.5+((i*7)%5)/10)),sw=wt.reduce((a,b)=>a+b,0),
+  mk=dir=>{let ci=0n,co=0n;return wt.map((w,i)=>{const L=p.tvlFiat/2*w/sw,dIn=dir<0?p.token0Decimals:p.token1Decimals,dOut=dir<0?p.token1Decimals:p.token0Decimals,pIn=dir<0?p.token0FiatPrice:p.token1FiatPrice,pOut=dir<0?p.token1FiatPrice:p.token0FiatPrice;ci+=BigInt(Math.round(L/pIn*10**dIn));co+=BigInt(Math.round(L/pOut*10**dOut));return{binIdx:dir<0?-1-i:-1+i,price:q(px*(1+dir*(i+1)*.002)),cumulativeVolume:String(co),cumulativeInputVolume:String(ci),priceImpactE6:String((i+1)*2000)}})};
+ return{priceProviderStatus:'healthy',bidAdj:q(px),askAdj:q(px*1.002),depth:{bids:mk(-1),asks:mk(1)}}}
+function demo(){S.demo=true;S.pools=genDemo();S.depth={};S.pools.forEach(p=>{S.depth[p.poolAddress]=demoDepth(p)});S.sel=S.pools.slice().sort((x,y)=>y.tvlFiat-x.tvlFiat)[0].poolAddress;S.ts=new Date();$('#errb').hidden=true;render()}
+S.pg={};
+function pgSlice(key,arr,size){const n=Math.max(1,Math.ceil(arr.length/size)),p=Math.min(Math.max(1,S.pg[key]||1),n);S.pg[key]=p;const rows=arr.slice((p-1)*size,p*size);if(n<2)return{rows,html:''};
+ const nums=[];for(let i=1;i<=n;i++)if(i===1||i===n||Math.abs(i-p)<=1)nums.push(i);const o=[];nums.forEach((v,i)=>{if(i&&v-nums[i-1]>1)o.push('<span class="pgd">…</span>');o.push(`<button data-pg="${key}:${v}" class="${v===p?'on':''}">${v}</button>`)});
+ return{rows,html:`<div class="pager"><span class="sub">${(p-1)*size+1}–${Math.min(arr.length,p*size)} of ${arr.length}</span><div class="pgb"><button data-pg="${key}:${p-1}" ${p<2?'disabled':''} aria-label="Previous page">${ic('chev-l',15)}</button>${o.join('')}<button data-pg="${key}:${p+1}" ${p>=n?'disabled':''} aria-label="Next page">${ic('chev-r',15)}</button></div></div>`}}
+const PGR={list:()=>list(),xct:()=>xcRender(),xcp:()=>xcRender(),cur:()=>lb(),cmp:()=>cmp(),wal:()=>walDraw()};
+document.addEventListener('click',e=>{const b=e.target.closest('[data-pg]');if(!b||b.disabled)return;const x=b.dataset.pg.split(':');S.pg[x[0]]=+x[1];sf(PGR[x[0]]||(()=>{}),'pagination')});
+function moveInd(bar){if(!bar)return;const b=bar.querySelector('button.on');if(!b||!b.offsetWidth)return;bar.style.setProperty('--x',b.offsetLeft+'px');bar.style.setProperty('--w',b.offsetWidth+'px')}
+function dd(host,items,val,onPick){if(!host||!items.length)return;const cur=items.find(i=>String(i.v)===String(val))||items[0];
+ host.innerHTML=`<button class="ddb" aria-haspopup="listbox"><span class="ddv">${cur.icon||''}${cur.label}</span>${ic('chev-d',14)}</button><div class="ddm" hidden role="listbox">${items.map(i=>{const on=String(i.v)===String(val);return`<button data-v="${i.v}" class="${on?'on':''}" role="option">${i.icon||''}<span>${i.label}</span>${on?ic('check',14):''}</button>`}).join('')}</div>`;
+ const b=host.querySelector('.ddb'),m=host.querySelector('.ddm');
+ b.onclick=e=>{e.stopPropagation();const open=m.hidden;closeDd();m.hidden=!open;host.classList.toggle('open',open)};
+ m.onclick=e=>{const x=e.target.closest('button[data-v]');if(!x)return;e.stopPropagation();closeDd();onPick(x.dataset.v)}}
+function closeDd(){document.querySelectorAll('.ddm').forEach(m=>{m.hidden=true});document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open'))}
+document.addEventListener('click',closeDd);addEventListener('keydown',e=>{if(e.key==='Escape')closeDd()});
+function chainUI(){dd($('#chaindd'),S.chains.map(c=>({v:c.chainId,label:c.name,icon:chainIcon(c.chainId,20)})),S.chain,v=>{S.chain=+v;S.sel=null;$('#chain').value=String(v);chainUI();rpcUI();load()})}
+function horUI(){dd($('#hordd'),[['1m','Markout 1 min'],['5m','Markout 5 min'],['30m','Markout 30 min']].map(x=>({v:x[0],label:x[1]})),S.h,v=>{S.h=v;horUI();render()})}
+function sim(){const p=S.pools.find(x=>x.poolAddress===S.sel),el=$('#sim');if(!p||!el)return;const m=met(p),D=+($('#dep').value)||0;
+ if(m.apr==null||m.tls==null||m.tls<.02){el.innerHTML='<div style="grid-column:1/-1;background:none;padding:0" class="note">Simulator unavailable: no reliable markout APR in this window (traded share under 2%, or not enough priced data).</div>';return}
+ const a=Math.max(-5000,m.apr)/1e4,u=a*m.tls,f=x=>(x<0?'-':'')+usd(Math.abs(x));
+ el.innerHTML=[['Uniform-bin APR',(u*100).toFixed(1)+'%'],['Active-bin APR',(a*100).toFixed(1)+'%'],['Concentration premium',m.tls>.005?'×'+(1/m.tls).toFixed(1):'∞'],['Uniform / yr on '+usd(D),f(D*u)],['Active-only / yr',f(D*a)],['Extra from focusing',f(D*(a-u))]].map(x=>`<div><span class="lbl">${x[0]}</span><b style="font-size:15px">${x[1]}</b></div>`).join('')+'<div style="grid-column:1/-1;background:none;padding:0" class="note">Based on past markout over '+S.w+' / '+S.h+', not a forecast. Active-bin APR is only reachable if you hold the bins that traded, and extra deposits dilute your share.</div>'}
+document.addEventListener('input',e=>{if(e.target.id==='dep'){S.dep=e.target.value;sim()}if(e.target.id==='tamt'){S.tamt=e.target.value;timpact()}});document.addEventListener('change',e=>{if(e.target.id==='tside'){S.tside=e.target.value;timpact()}});
+function cmp(){if(!$('#cmp'))return;const g={};S.pools.forEach(p=>(g[p.pair]=g[p.pair]||[]).push(p));
+ const sel=S.pools.find(x=>x.poolAddress===S.sel),pair=sel?.pair,a=(g[pair]||[]).map(p=>({p,m:met(p)})).sort((x,y)=>(y.m.score??-1)-(x.m.score??-1)),CM=pgSlice('cmp',a,6);
+ $('#cmp').innerHTML=`<h3 style="margin-top:0">Pool comparison · ${pair||''} <small class="sub">${a.length} pool(s) with the same pair</small></h3><div class="tw"><table><tr><th>Pool</th><th>TVL</th><th>Efficiency</th><th>Idle</th><th>Markout</th><th>Fee share</th><th>Tier</th><th>Verdict</th></tr>
+ ${CM.rows.map(({p,m})=>{const ok=(m.score??0)>=60&&(m.mk??-1)>0&&m.fee!=null&&m.fee<=.4;return`<tr class="cl" data-a="${p.poolAddress}"><td>${p.poolAddress.slice(0,8)}…${p.poolAddress.slice(-4)}</td><td>${usd(m.tvl)}</td><td style="color:${col(m.score)}">${m.score??'N/A'}</td><td>${usd(m.idle)}</td><td class="${m.mk>0?'pos':'neg'}">${m.mk==null?'—':usd(m.mk)}</td><td>${pct(m.fee)}</td><td>${p.classificationSummary?.tierQualification||'—'}</td><td>${ok?'<span class="pos">'+ic('check',14)+' Efficient · +Markout · Fair fee</span>':'—'}</td></tr>`}).join('')}</table></div>${CM.html}`}
+function lb(){const a=S.pools.map(p=>({p,m:met(p)})).filter(x=>x.m.score!=null&&x.m.tvl>=1000);
+ const row=(x,v,c)=>`<div class="pool" data-a="${x.p.poolAddress}"><div><div class="nm">${pair2(x.p,20)}${x.p.pair}</div><div class="mt">${usd(x.m.tvl)} TVL</div></div><div class="sc" style="color:${c}">${v}</div></div>`;
+ const T=a.slice().sort((x,y)=>y.m.score-x.m.score).slice(0,6),I=a.slice().sort((x,y)=>y.m.idle-x.m.idle).slice(0,6);
+ const pts=a.filter(x=>x.m.apr!=null),ap=pts.map(x=>Math.max(-5000,Math.min(20000,x.m.apr))/100),lo=Math.min(0,...ap),hi=Math.max(1,...ap),Y=v=>190-(v-lo)/(hi-lo)*170;
+ const G={};a.forEach(x=>{const k=x.p.adminUsername||(x.p.admin?x.p.admin.slice(0,8)+'…':'unknown'),g=G[k]=G[k]||{n:0,tvl:0,ws:0,idle:0,v:!!x.p.verifiedAdmin};g.n++;g.tvl+=x.m.tvl;g.ws+=x.m.score*x.m.tvl;g.idle+=x.m.idle||0});
+ const CU=pgSlice('cur',Object.entries(G).sort((x,y)=>y[1].tvl-x[1].tvl),6),cur=`<div class="card" style="grid-column:1/-1"><h3 style="margin-top:0">${ic('users',18)} Curator Efficiency Board</h3><div class="tw"><table><tr><th>Curator</th><th>Pools</th><th>TVL</th><th>Weighted efficiency</th><th>Idle capital</th></tr>${CU.rows.map(([k,g])=>`<tr><td>${k}${g.v?' '+ic('badge',14,'ok'):''}</td><td>${g.n}</td><td>${usd(g.tvl)}</td><td style="color:${col(g.ws/g.tvl)}">${(g.ws/g.tvl).toFixed(0)}</td><td>${usd(g.idle)}</td></tr>`).join('')}</table></div>${CU.html}</div>`;
+ $('#lb').innerHTML=`<div class="card"><h3 style="margin-top:0">${ic('trophy',18)} Most efficient (${S.w})</h3>${T.map(x=>row(x,x.m.score,'var(--g)')).join('')||'No data'}</div>
+ <div class="card"><h3 style="margin-top:0">${ic('snow',18)} Most idle capital (${S.w})</h3>${I.map(x=>row(x,usd(x.m.idle),'var(--r)')).join('')||'No data'}</div>
+ <div class="card" style="grid-column:1/-1"><h3 style="margin-top:0">Efficiency vs Markout APR <small class="sub">x: efficiency · y: markout APR % (clamped) · size: TVL · click a dot</small></h3>
+ <svg viewBox="0 0 600 215" style="width:100%"><line x1="30" x2="590" y1="${Y(0)}" y2="${Y(0)}" stroke="#ffffff33" stroke-dasharray="4"/><text x="2" y="${Y(0)+4}" fill="#8c93b8" font-size="10">0%</text><text x="30" y="210" fill="#8c93b8" font-size="10">0</text><text x="560" y="210" fill="#8c93b8" font-size="10">100</text>
+ ${pts.map((x,i)=>`<circle class="dot" data-a="${x.p.poolAddress}" data-t="${x.p.pair}<br>Eff ${x.m.score} · APR ${ap[i].toFixed(1)}%<br>${usd(x.m.tvl)} TVL" cx="${30+x.m.score/100*560}" cy="${Y(ap[i])}" r="${Math.max(3,Math.min(14,Math.sqrt(x.m.tvl)/40))}" fill="${col(x.m.score)}" opacity=".6"/>`).join('')}</svg></div>${cur}`}
+$('#csv').onclick=()=>{const h='pair,pool,chainId,tvl,efficiency,tradedLiquidityShare,tradedBins,fundedBins,idleUsd,markoutUsd,markoutAprBps,spreadFeeShare,tier',r=filtered().map(p=>{const m=met(p);return[p.pair,p.poolAddress,S.chain,m.tvl,m.score,m.tls,m.tb,m.fb,m.idle,m.mk,m.apr,m.fee,p.classificationSummary?.tierQualification].map(v=>v==null?'':v).join(',')}),a=document.createElement('a');a.href=URL.createObjectURL(new Blob([[h,...r].join('\n')],{type:'text/csv'}));a.download=`metric-efficiency-${S.chain}-${S.w}.csv`;a.click()};
+setInterval(()=>load(true),60000);
+document.addEventListener('click',e=>{const s=e.target.closest('[data-star]');if(s){const a=s.dataset.star;watch=watch.includes(a)?watch.filter(x=>x!==a):[...watch,a];LS.set('lem_watch',watch);list();return}
+ const c=e.target.closest('[data-a]');if(c){const fm=!!c.closest('#pane-market,#pane-rank,#pane-xc,#pane-wallet');if(c.dataset.ch&&+c.dataset.ch!==S.chain){openPool(+c.dataset.ch,c.dataset.a);return}S.sel=c.dataset.a;if(fm)setTab('analyzer');try{list();detail();cmp();tm()}catch(err){console.error(err);$('#detail').innerHTML='<div class="card load">Could not render this pool.</div>'}if(fm)scrollTo({top:Math.max(0,$('#tabs').offsetTop-10),behavior:'smooth'});return}
+ const f=e.target.closest('[data-f]');if(f){const k=f.dataset.f;S.f.has(k)?S.f.delete(k):S.f.add(k);f.classList.toggle('on');S.pg.list=1;list()}});
+document.addEventListener('mousemove',e=>{const c=e.target.closest('.cell,.dot,.tile,.hint'),t=$('#tip');if(c){t.style.display='block';t.innerHTML=c.dataset.t;t.style.left=Math.min(e.clientX+14,innerWidth-190)+'px';t.style.top=e.clientY+14+'px'}else t.style.display='none'});
+$('#q').oninput=()=>{S.pg.list=1;list()};$('#sort').onchange=()=>{S.pg.list=1;list()};
+
+horUI();
+$('#win').onclick=e=>{const b=e.target.closest('button');if(!b)return;S.w=b.dataset.w;[...$('#win').children].forEach(x=>x.classList.toggle('on',x===b));render()};
+document.querySelectorAll('i[data-ic]').forEach(e=>{e.outerHTML=ic(e.dataset.ic,+e.dataset.s||16)});
+requestAnimationFrame(()=>moveInd($('#tabs')));addEventListener('resize',()=>{moveInd($('#tabs'));moveInd($('#stabs'))});if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>moveInd($('#tabs')));
+if(LS.get('lem_hero',0))$('#hero').hidden=true;$('#heroX').onclick=()=>{$('#hero').hidden=true;LS.set('lem_hero',1)};
+addEventListener('keydown',e=>{if(e.key==='/'&&!/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)){e.preventDefault();setTab('analyzer');$('#q').focus()}});
+(async()=>{await chains();const h=location.hash.match(/#(\d+)\/(0x[0-9a-fA-F]{40})/);if(h&&[...$('#chain').options].some(o=>o.value===h[1])){S.chain=+h[1];$('#chain').value=h[1];S.sel=h[2];chainUI();setTab('analyzer')}load()})();
+</script>
+</body>
+</html>
