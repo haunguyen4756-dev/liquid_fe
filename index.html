@@ -3,7 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Liquidity Efficiency Map · Metric</title>
+<title>Liquidity Efficiency Map · Find Idle LP Capital on Metric</title>
+<meta name="description" content="See which Metric pools put your liquidity to work and which leave it idle. Live efficiency scores, bin-level liquidity maps, wallet check and LP simulators, all from on-chain data.">
+<meta name="theme-color" content="#070914">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Liquidity Efficiency Map · Find Idle LP Capital on Metric">
+<meta property="og:description" content="See which Metric pools put your liquidity to work and which leave it idle. Live efficiency scores, bin-level liquidity maps, wallet check and LP simulators, all from on-chain data.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Liquidity Efficiency Map · Find Idle LP Capital on Metric">
+<meta name="twitter:description" content="See which Metric pools put your liquidity to work and which leave it idle. Live efficiency scores, bin-level liquidity maps, wallet check and LP simulators, all from on-chain data.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -213,7 +221,7 @@ h3{margin:22px 0 12px;font-size:15.5px}
 <div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
 <div class="tip" id="tip"></div>
 <header class="hdr"><div class="hin">
-  <div class="logo"><div class="lg"><i></i></div><div><h1>Liquidity Efficiency <span>Map</span></h1><div class="sub">Community tool for Metric LPs · live data from api.metric.xyz</div></div></div>
+  <div class="logo"><div class="lg"><i></i></div><div><h1>Liquidity Efficiency <span>Map</span></h1><div class="sub">Find idle capital and put your liquidity to work · Community tool for Metric LPs · live data</div></div></div>
   <div class="hctl">
     <div class="cg"><small>Network</small><div class="dd" id="chaindd"></div></div>
     <div class="cg"><small>Window</small><div class="seg" id="win"><button data-w="24h">24h</button><button data-w="7d" class="on">7d</button><button data-w="30d">30d</button><button data-w="all">All</button></div></div>
@@ -225,7 +233,7 @@ h3{margin:22px 0 12px;font-size:15.5px}
 <div class="wrap">
 
 <div class="sub" id="upd" style="margin-bottom:10px"></div><div id="alerts"></div><div id="errb" class="alert err" hidden></div>
-<div class="hero card glow" id="hero"><div><h2>See where LP capital actually works</h2><p>On Metric, LPs choose their bins, but only bins that trade earn spread. This map shows how much of each pool is working and how much sits idle.</p></div>
+<div class="hero card glow" id="hero"><div><h2>See where LP capital actually works</h2><p>On Metric you choose your own bins, but only the bins that get swaps earn spread. This map shows how much of every pool is working and how much sits idle, so you can pick better pools and place your liquidity where trades actually happen.</p></div>
 <div class="steps"><div><span class="si"><i data-ic="map"></i></span><b>1 · Scan the map</b><small>Green tiles are efficient pools, red tiles hold idle capital.</small></div><div><span class="si"><i data-ic="chart"></i></span><b>2 · Open a pool</b><small>Click a tile to see its liquidity by price and its risk profile.</small></div><div><span class="si"><i data-ic="sliders"></i></span><b>3 · Plan a position</b><small>Use the simulators to size a deposit or test a trade.</small></div></div>
 <button id="heroX" class="btn-ghost"><i data-ic="check" data-s="15"></i>Got it</button></div>
 <div class="stats" id="stats"></div>
